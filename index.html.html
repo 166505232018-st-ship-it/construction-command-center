@@ -1,0 +1,2740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Construction Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F6F8;
+    --surface:#FFFFFF;
+    --surface-2:#FAFBFC;
+    --border:#E3E6EA;
+    --border-strong:#CBD0D8;
+    --ink:#171A21;
+    --ink-2:#4B5160;
+    --ink-3:#868C99;
+    --brand:#1F4E5F;
+    --brand-ink:#123340;
+    --brand-soft:#E4EEF1;
+    --steel:#3E6E82;
+
+    --green:#1E8A5F;
+    --green-soft:#E4F5EE;
+    --amber:#B67B0E;
+    --amber-soft:#FBF0DC;
+    --red:#C1402F;
+    --red-soft:#FBE7E3;
+    --blue:#2C6CA6;
+    --blue-soft:#E4EEF8;
+    --gray-soft:#EEF0F3;
+
+    --radius-s:6px;
+    --radius-m:10px;
+    --radius-l:14px;
+    --shadow-1:0 1px 2px rgba(20,24,32,.06);
+    --shadow-2:0 4px 16px rgba(20,24,32,.08);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  body.lang-th{font-family:'Noto Sans Thai','Inter',sans-serif;}
+  .th{font-family:'Noto Sans Thai','Inter',sans-serif;}
+  ::selection{background:var(--brand-soft);}
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px;}
+
+  /* ---------- App shell ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:248px 1fr;
+    min-height:100vh;
+  }
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    background:var(--brand-ink);
+    color:#DDE7EA;
+    display:flex;
+    flex-direction:column;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:20px 18px 16px;
+    border-bottom:1px solid rgba(255,255,255,.09);
+  }
+  .brand-mark{
+    width:34px;height:34px;border-radius:8px;
+    background:linear-gradient(155deg,#3E6E82,#1F4E5F);
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    border:1px solid rgba(255,255,255,.14);
+  }
+  .brand-mark svg{width:18px;height:18px;}
+  .brand-name{font-size:13.5px;font-weight:700;color:#fff;line-height:1.25;}
+  .brand-sub{font-size:10.5px;color:#93A7AD;letter-spacing:.02em;margin-top:1px;}
+
+  .nav-group-label{
+    font-size:10.5px;
+    font-weight:600;
+    color:#6F8890;
+    padding:16px 18px 6px;
+    letter-spacing:.03em;
+    display:flex;align-items:center;gap:6px;
+  }
+  .ng-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .nav{padding:4px 10px 16px;flex:1;}
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 10px 8px 8px;
+    border-radius:8px;
+    font-size:13.3px;
+    font-weight:500;
+    color:#B9CBCF;
+    text-decoration:none;
+    margin-bottom:1px;
+    border:none;background:none;width:100%;text-align:left;
+    border-left:3px solid transparent;
+    transition:background .12s ease, color .12s ease, border-color .12s ease;
+  }
+  .nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:.85;}
+  .nav-item:hover{background:rgba(255,255,255,.07);color:#fff;}
+  .nav-item.active{background:#EAF1F0;color:var(--brand-ink);font-weight:600;border-left-color:var(--item-accent, var(--brand));}
+  .nav-item.active svg{opacity:1;color:var(--item-accent, var(--brand-ink));}
+  .nav-item .count{
+    margin-left:auto;
+    font-size:10.5px;
+    font-weight:700;
+    background:rgba(255,255,255,.12);
+    color:#DDE7EA;
+    padding:1px 6px;
+    border-radius:20px;
+  }
+  .nav-item.active .count{background:var(--red);color:#fff;}
+
+  .sidebar-foot{
+    padding:12px 18px 16px;
+    border-top:1px solid rgba(255,255,255,.09);
+    font-size:11px;
+    color:#6F8890;
+    line-height:1.5;
+  }
+
+  .sidebar-scrim{display:none;}
+
+  /* ---------- Main ---------- */
+  .main{display:flex;flex-direction:column;min-width:0;}
+  .topbar{
+    height:58px;
+    background:var(--surface);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:16px;
+    padding:0 22px;
+    position:sticky;top:0;z-index:20;
+  }
+  .search{
+    flex:1;max-width:420px;
+    display:flex;align-items:center;gap:8px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:7px 12px;
+    color:var(--ink-3);
+  }
+  .search svg{width:15px;height:15px;flex-shrink:0;}
+  .search input{
+    border:none;background:none;outline:none;
+    font-size:13px;color:var(--ink);width:100%;font-family:inherit;
+  }
+  .search input::placeholder{color:var(--ink-3);}
+  .topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto;}
+
+  .icon-btn{
+    width:34px;height:34px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    background:none;border:1px solid transparent;color:var(--ink-2);
+    position:relative;
+  }
+  .icon-btn:hover{background:var(--surface-2);border-color:var(--border);}
+  .icon-btn svg{width:17px;height:17px;}
+  .dot-badge{
+    position:absolute;top:6px;right:6px;
+    width:7px;height:7px;border-radius:50%;background:var(--red);
+    border:1.5px solid var(--surface);
+  }
+
+  .lang-switch{
+    display:flex;align-items:center;background:var(--surface-2);border:1px solid var(--border);
+    border-radius:8px;padding:2px;gap:2px;
+  }
+  .lang-opt{
+    border:none;background:none;font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:6px;color:var(--ink-3);
+  }
+  .lang-opt.sel{background:var(--surface);color:var(--brand-ink);box-shadow:var(--shadow-1);}
+
+  .role-switch{position:relative;}
+  .role-btn{
+    display:flex;align-items:center;gap:8px;
+    border:1px solid var(--border);background:var(--surface);
+    border-radius:8px;padding:6px 10px 6px 6px;font-size:12.5px;font-weight:600;color:var(--ink);
+  }
+  .role-btn:hover{border-color:var(--border-strong);}
+  .role-avatar{
+    width:22px;height:22px;border-radius:6px;
+    background:var(--brand-soft);color:var(--brand-ink);
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:800;
+  }
+  .role-btn .rlabel-mut{color:var(--ink-3);font-weight:500;}
+  .role-menu{
+    position:absolute;top:calc(100% + 6px);right:0;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;box-shadow:var(--shadow-2);
+    width:200px;padding:6px;display:none;z-index:30;
+  }
+  .role-menu.open{display:block;}
+  .role-opt{
+    display:flex;align-items:center;gap:9px;width:100%;
+    padding:8px 9px;border-radius:7px;border:none;background:none;
+    font-size:12.8px;font-weight:500;text-align:left;color:var(--ink-2);
+  }
+  .role-opt:hover{background:var(--surface-2);}
+  .role-opt.sel{background:var(--brand-soft);color:var(--brand-ink);font-weight:700;}
+  .role-opt .role-avatar{width:20px;height:20px;font-size:9px;}
+
+  .notif-panel{
+    position:absolute;top:calc(100% + 6px);right:0;
+    width:340px;background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;box-shadow:var(--shadow-2);display:none;z-index:30;
+    max-height:420px;overflow-y:auto;
+  }
+  .notif-panel.open{display:block;}
+  .notif-head{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;}
+  .notif-item{
+    display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);
+    text-align:left;width:100%;border:none;background:none;
+  }
+  .notif-item:last-child{border-bottom:none;}
+  .notif-item:hover{background:var(--surface-2);}
+  .notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+  .notif-text{font-size:12.5px;color:var(--ink);line-height:1.45;}
+  .notif-time{font-size:11px;color:var(--ink-3);margin-top:2px;}
+
+  .content{padding:24px 28px 60px;flex:1;min-width:0;}
+  .content-inner{max-width:1180px;}
+
+  /* ---------- Page header ---------- */
+  .page-head{margin-bottom:20px;}
+  .crumb{font-size:11.5px;color:var(--ink-3);font-weight:600;letter-spacing:.02em;margin-bottom:4px;}
+  .page-title{font-size:21px;font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+  .page-sub{font-size:13px;color:var(--ink-2);margin-top:4px;max-width:640px;line-height:1.5;}
+
+  .project-strip{
+    display:flex;align-items:center;gap:14px;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-m);padding:14px 18px;margin-bottom:20px;
+  }
+  .project-strip h1{font-size:16.5px;font-weight:800;margin:0;}
+  .project-strip .proj-meta{font-size:12px;color:var(--ink-3);margin-top:2px;}
+  .status-pill{
+    margin-left:auto;display:flex;align-items:center;gap:6px;
+    background:var(--green-soft);color:var(--green);
+    font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;
+  }
+  .status-pill .dot{width:6px;height:6px;border-radius:50%;background:var(--green);}
+
+  /* ---------- Cards / grid ---------- */
+  .grid{display:grid;gap:14px;}
+  .grid > *{min-width:0;}
+  .card{overflow:hidden;}
+  .grid-4{grid-template-columns:repeat(4,1fr);}
+  .grid-3{grid-template-columns:repeat(3,1fr);}
+  .grid-2{grid-template-columns:repeat(2,1fr);}
+  @media (max-width:1000px){.grid-4{grid-template-columns:repeat(2,1fr);}.grid-3{grid-template-columns:repeat(2,1fr);}}
+
+  .card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-m);padding:16px;
+  }
+  .stat-card{padding:15px 16px;}
+  .stat-label{font-size:11.5px;color:var(--ink-3);font-weight:600;display:flex;align-items:center;justify-content:space-between;}
+  .stat-value{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-top:6px;color:var(--ink);}
+  .stat-delta{font-size:11.5px;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:4px;}
+  .stat-delta.up{color:var(--red);}
+  .stat-delta.good{color:var(--green);}
+  .stat-delta.flat{color:var(--ink-3);}
+  .stat-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;}
+  .stat-icon svg{width:14px;height:14px;}
+
+  .bar-track{height:6px;background:var(--gray-soft);border-radius:6px;margin-top:10px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:6px;}
+
+  .section{margin-bottom:26px;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px;}
+  .section-title{font-size:15px;font-weight:800;}
+  .section-link{font-size:12px;font-weight:600;color:var(--brand);background:none;border:none;}
+  .section-link:hover{text-decoration:underline;}
+
+  /* ---------- Table ---------- */
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;}
+  table{width:100%;border-collapse:collapse;font-size:12.8px;}
+  thead th{
+    text-align:left;font-size:11px;font-weight:700;color:var(--ink-3);
+    text-transform:none;padding:10px 14px;background:var(--surface-2);
+    border-bottom:1px solid var(--border);letter-spacing:.01em;
+  }
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--border);color:var(--ink-2);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr{transition:background .1s ease;}
+  tbody tr.clickable:hover{background:var(--surface-2);cursor:pointer;}
+  td.strong{color:var(--ink);font-weight:600;}
+
+  /* ---------- Badges ---------- */
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;
+    white-space:nowrap;
+  }
+  .badge .dot{width:5px;height:5px;border-radius:50%;}
+  .badge-green{background:var(--green-soft);color:var(--green);}
+  .badge-amber{background:var(--amber-soft);color:var(--amber);}
+  .badge-red{background:var(--red-soft);color:var(--red);}
+  .badge-blue{background:var(--blue-soft);color:var(--blue);}
+  .badge-gray{background:var(--gray-soft);color:var(--ink-2);}
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:12.5px;font-weight:700;padding:8px 14px;
+    border-radius:8px;border:1px solid var(--border-strong);
+    background:var(--surface);color:var(--ink);
+  }
+  .btn:hover{background:var(--surface-2);}
+  .btn svg{width:14px;height:14px;}
+  .btn-primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+  .btn-primary:hover{background:var(--brand-ink);}
+  .btn-green{background:var(--green);border-color:var(--green);color:#fff;}
+  .btn-green:hover{filter:brightness(.94);}
+  .btn-red-outline{background:var(--surface);border-color:var(--red);color:var(--red);}
+  .btn-red-outline:hover{background:var(--red-soft);}
+  .btn-sm{padding:6px 10px;font-size:11.8px;}
+  .btn-ghost{border-color:transparent;background:none;}
+  .btn-ghost:hover{background:var(--surface-2);}
+
+  /* ---------- Today list ---------- */
+  .today-row{
+    display:grid;grid-template-columns:1.6fr 1fr 1.2fr .9fr 1fr;gap:10px;
+    padding:13px 16px;align-items:center;
+  }
+  .today-row + .today-row{border-top:1px solid var(--border);}
+  .today-task{font-weight:700;font-size:13px;color:var(--ink);}
+  .today-meta{font-size:11.5px;color:var(--ink-3);margin-top:2px;}
+  .mini-progress{display:flex;align-items:center;gap:8px;}
+  .mini-progress .bar-track{flex:1;margin:0;}
+  .mini-progress span{font-size:12px;font-weight:700;width:32px;text-align:right;}
+  @media (max-width:900px){.today-row{grid-template-columns:1fr;gap:6px;}}
+
+  /* ---------- Command cards ---------- */
+  .cmd-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-m);padding:16px;margin-bottom:10px;
+    display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;
+  }
+  .cmd-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-1);cursor:pointer;}
+  .cmd-id{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-3);font-weight:500;}
+  .cmd-subject{font-size:14.5px;font-weight:700;margin-top:3px;}
+  .cmd-meta{display:flex;gap:16px;margin-top:9px;flex-wrap:wrap;}
+  .cmd-meta div{font-size:11.5px;color:var(--ink-3);}
+  .cmd-meta b{color:var(--ink-2);font-weight:600;}
+
+  /* ---------- Detail layout ---------- */
+  .back-link{
+    display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;
+    color:var(--ink-2);background:none;border:none;margin-bottom:14px;
+  }
+  .back-link:hover{color:var(--brand);}
+  .back-link svg{width:14px;height:14px;}
+  .detail-grid{display:grid;grid-template-columns:1fr 300px;gap:18px;align-items:start;}
+  @media (max-width:920px){.detail-grid{grid-template-columns:1fr;}}
+  .info-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:12.8px;}
+  .info-row:last-child{border-bottom:none;}
+  .info-row .k{color:var(--ink-3);}
+  .info-row .v{color:var(--ink);font-weight:600;text-align:right;}
+
+  .task-row{display:grid;grid-template-columns:28px 1.6fr 1fr auto;gap:10px;align-items:center;padding:11px 14px;}
+  .task-row + .task-row{border-top:1px solid var(--border);}
+  .task-num{
+    width:22px;height:22px;border-radius:6px;background:var(--surface-2);border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;color:var(--ink-3);
+  }
+  .task-name{font-size:12.8px;font-weight:600;color:var(--ink);}
+
+  /* ---------- Impact map ---------- */
+  .impact-wrap{display:grid;grid-template-columns:1fr 280px;gap:18px;}
+  @media (max-width:920px){.impact-wrap{grid-template-columns:1fr;}}
+  .flow-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:22px 20px;}
+  .flow-node{
+    display:flex;align-items:center;gap:12px;padding:13px 15px;
+    border:1px solid var(--border);border-radius:var(--radius-s);background:var(--surface-2);
+    position:relative;
+  }
+  .flow-node.origin{background:var(--brand-soft);border-color:var(--steel);}
+  .flow-node .fn-num{
+    width:26px;height:26px;border-radius:50%;background:var(--surface);border:1px solid var(--border-strong);
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--ink-2);flex-shrink:0;
+  }
+  .flow-node.done .fn-num{background:var(--green);border-color:var(--green);color:#fff;}
+  .flow-node.active .fn-num{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .flow-node .fn-name{font-size:13px;font-weight:700;flex:1;}
+  .flow-node .fn-pct{font-size:12px;font-weight:700;color:var(--ink-3);}
+  .flow-connector{
+    width:2px;height:22px;background:var(--border-strong);margin-left:26px;
+  }
+  .impact-stat{padding:13px 0;border-bottom:1px solid var(--border);}
+  .impact-stat:last-child{border-bottom:none;}
+  .impact-stat .il{font-size:11px;color:var(--ink-3);font-weight:600;}
+  .impact-stat .iv{font-size:19px;font-weight:800;margin-top:3px;}
+  .impact-stat .iv.red{color:var(--red);}
+  .impact-stat .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  .tag{font-size:11px;background:var(--gray-soft);color:var(--ink-2);padding:3px 8px;border-radius:6px;font-weight:600;}
+
+  /* ---------- Progress compare ---------- */
+  .compare-bars{display:flex;flex-direction:column;gap:14px;}
+  .cbar-row .cbar-top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;}
+  .cbar-row .cbar-top b{font-weight:700;color:var(--ink);}
+  .cbar-track{height:10px;background:var(--gray-soft);border-radius:6px;overflow:hidden;}
+  .cbar-fill{height:100%;border-radius:6px;}
+
+  .alert{
+    display:flex;gap:12px;padding:14px 16px;border-radius:var(--radius-m);border:1px solid;
+    align-items:flex-start;
+  }
+  .alert svg{width:18px;height:18px;flex-shrink:0;margin-top:1px;}
+  .alert-amber{background:var(--amber-soft);border-color:#EBD19E;color:#8A5D08;}
+  .alert-red{background:var(--red-soft);border-color:#E9B6AC;color:#8F2C1F;}
+  .alert-blue{background:var(--blue-soft);border-color:#B7D0E8;color:#1E4E77;}
+  .alert-title{font-weight:700;font-size:12.8px;}
+  .alert-body{font-size:12.3px;margin-top:2px;line-height:1.5;opacity:.92;}
+  .alert-actions{margin-top:9px;display:flex;gap:8px;}
+
+  /* ---------- Verification queue ---------- */
+  .verify-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;margin-bottom:12px;}
+  .verify-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .verify-name{font-size:13.5px;font-weight:700;}
+  .verify-loc{font-size:11.8px;color:var(--ink-3);margin-top:2px;}
+  .verify-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+  .verify-col{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
+  .verify-col .vl{font-size:10.5px;color:var(--ink-3);font-weight:700;}
+  .verify-col .vv{font-size:19px;font-weight:800;margin-top:3px;}
+  .verify-actions{display:flex;gap:8px;}
+  @media (max-width:700px){.verify-cols{grid-template-columns:1fr;}}
+
+  /* ---------- Evidence ---------- */
+  .ev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media (max-width:900px){.ev-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:600px){.ev-grid{grid-template-columns:1fr;}}
+  .ev-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);overflow:hidden;cursor:pointer;}
+  .ev-card:hover{border-color:var(--border-strong);}
+  .ev-thumb{
+    height:120px;background:linear-gradient(135deg,#D9E4E8,#C3D3D8);
+    display:flex;align-items:center;justify-content:center;color:#6F8890;position:relative;
+  }
+  .ev-thumb svg{width:28px;height:28px;}
+  .ev-flag{position:absolute;top:8px;right:8px;}
+  .ev-body{padding:11px 13px;}
+  .ev-id{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-3);}
+  .ev-task{font-size:12.5px;font-weight:700;margin-top:3px;}
+  .ev-foot{font-size:11px;color:var(--ink-3);margin-top:7px;}
+
+  .ai-box{
+    background:var(--surface-2);border:1px dashed var(--border-strong);border-radius:var(--radius-m);
+    padding:16px;margin-top:16px;
+  }
+  .ai-box-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .ai-box-head .ai-chip{
+    display:flex;align-items:center;gap:5px;background:var(--brand-soft);color:var(--brand-ink);
+    font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;
+  }
+  .ai-box-head .ai-chip svg{width:12px;height:12px;}
+  .ai-row{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:10px;}
+  .ai-metric .al{font-size:10.5px;color:var(--ink-3);font-weight:700;}
+  .ai-metric .av{font-size:20px;font-weight:800;margin-top:2px;}
+
+  /* ---------- Action Required ---------- */
+  .action-item{
+    display:flex;gap:12px;align-items:flex-start;
+    background:var(--surface);border:1px solid var(--border);border-left:4px solid;
+    border-radius:var(--radius-m);padding:14px 16px;margin-bottom:10px;
+  }
+  .action-item.crit{border-left-color:var(--red);}
+  .action-item.att{border-left-color:var(--amber);}
+  .action-item.fyi{border-left-color:var(--blue);}
+  .action-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .action-icon svg{width:15px;height:15px;}
+  .action-text{font-size:13px;font-weight:700;}
+  .action-meta{display:flex;gap:14px;margin-top:7px;flex-wrap:wrap;}
+  .action-meta div{font-size:11.5px;color:var(--ink-3);}
+  .action-meta b{color:var(--ink-2);font-weight:600;}
+  .action-right{margin-left:auto;flex-shrink:0;}
+
+  /* ---------- Insight ---------- */
+  .insight-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px;margin-bottom:12px;}
+  .insight-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .insight-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .insight-icon svg{width:15px;height:15px;}
+  .insight-type{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-3);}
+  .insight-title{font-size:13.8px;font-weight:700;}
+  .insight-body{font-size:12.5px;color:var(--ink-2);line-height:1.55;margin-bottom:10px;}
+  .insight-facts{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:10px;}
+  .insight-facts .fl{font-size:10.5px;color:var(--ink-3);font-weight:700;}
+  .insight-facts .fv{font-size:13.5px;font-weight:700;margin-top:2px;}
+
+  /* ---------- Documents ---------- */
+  .doc-cat{margin-bottom:22px;}
+  .doc-cat-title{font-size:12.5px;font-weight:800;color:var(--ink-2);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+  .doc-cat-title .n{font-weight:600;color:var(--ink-3);}
+  .doc-row{
+    display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius-s);padding:11px 14px;margin-bottom:6px;
+  }
+  .doc-row:hover{border-color:var(--border-strong);}
+  .doc-icon{width:30px;height:30px;border-radius:7px;background:var(--surface-2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .doc-icon svg{width:14px;height:14px;color:var(--ink-3);}
+  .doc-name{font-size:12.8px;font-weight:700;}
+  .doc-meta{font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .doc-link{font-size:11px;color:var(--brand);font-weight:700;margin-left:auto;white-space:nowrap;}
+
+  /* ---------- Data conflict ---------- */
+  .conflict-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-m);padding:18px;margin-bottom:16px;}
+  .conflict-vals{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;}
+  @media (max-width:800px){.conflict-vals{grid-template-columns:repeat(2,1fr);}}
+  .conflict-cell{border:1px solid var(--border);border-radius:8px;padding:11px 12px;text-align:center;}
+  .conflict-cell.truth{background:var(--brand-soft);border-color:var(--steel);}
+  .conflict-cell .cl{font-size:10px;color:var(--ink-3);font-weight:700;}
+  .conflict-cell .cv{font-size:20px;font-weight:800;margin-top:4px;}
+
+  /* ---------- About ---------- */
+  .about-hero{background:var(--brand-ink);color:#fff;border-radius:var(--radius-l);padding:32px;margin-bottom:20px;position:relative;overflow:hidden;}
+  .about-hero::after{
+    content:"";position:absolute;right:-60px;top:-60px;width:240px;height:240px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,.08),transparent 70%);
+  }
+  .about-eyebrow{font-size:12px;font-weight:700;color:#9FC1C9;}
+  .about-title{font-size:24px;font-weight:800;margin-top:6px;max-width:560px;line-height:1.3;}
+  .about-flow{font-size:13px;color:#C7DADE;margin-top:14px;font-family:'JetBrains Mono',monospace;}
+  .about-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:800px){.about-cols{grid-template-columns:1fr;}}
+  .problem-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:12.8px;color:var(--ink-2);}
+  .problem-item:last-child{border-bottom:none;}
+  .problem-item b{color:var(--red);font-weight:800;flex-shrink:0;}
+  .credit-box{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-m);padding:16px 18px;margin-top:6px;}
+  .credit-row{display:flex;justify-content:space-between;font-size:12.5px;padding:6px 0;color:var(--ink-2);}
+  .credit-row b{color:var(--ink);font-weight:700;}
+
+  .role-perm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px;}
+  @media (max-width:1050px){.role-perm-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.role-perm-grid{grid-template-columns:1fr;}}
+  .perm-card{border:1px solid var(--border);border-radius:var(--radius-m);padding:14px;}
+  .perm-card h4{margin:0 0 8px;font-size:12.5px;font-weight:800;}
+  .perm-card ul{margin:0;padding-left:16px;font-size:11.8px;color:var(--ink-2);line-height:1.8;}
+
+  /* ---------- Mobile ---------- */
+  @media (max-width:880px){
+    .app{grid-template-columns:1fr;}
+    .sidebar{position:fixed;left:0;top:0;bottom:0;width:248px;z-index:100;transform:translateX(-100%);transition:transform .2s ease;}
+    .sidebar.open{transform:translateX(0);box-shadow:var(--shadow-2);}
+    .sidebar-scrim{display:none;position:fixed;inset:0;background:rgba(10,14,18,.4);z-index:90;}
+    .sidebar-scrim.open{display:block;}
+    .content{padding:16px 14px 90px;}
+    .grid-4,.grid-3,.grid-2{grid-template-columns:repeat(2,1fr);}
+    .project-strip{flex-wrap:wrap;}
+    .status-pill{margin-left:0;}
+    .topbar{padding:0 12px;gap:8px;}
+    .search{max-width:none;}
+    .role-btn .rlabel-mut{display:none;}
+  }
+  @media (max-width:560px){
+    .grid-3,.grid-2{grid-template-columns:1fr;}
+    .grid-4{grid-template-columns:repeat(2,1fr);}
+    .stat-value{font-size:22px;}
+    .verify-cols{grid-template-columns:1fr;}
+    .ev-grid{grid-template-columns:1fr;}
+    .role-btn span:not(.role-avatar){display:none;}
+  }
+
+  .kbd-hint{font-size:10.5px;color:var(--ink-3);border:1px solid var(--border);padding:1px 6px;border-radius:5px;font-family:'JetBrains Mono',monospace;}
+
+  .search-results{
+    position:absolute;top:calc(100% + 6px);left:0;right:0;
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    box-shadow:var(--shadow-2);max-height:340px;overflow-y:auto;display:none;z-index:30;
+  }
+  .search-results.open{display:block;}
+  .sr-item{display:flex;flex-direction:column;padding:10px 14px;border-bottom:1px solid var(--border);}
+  .sr-item:last-child{border-bottom:none;}
+  .sr-item:hover{background:var(--surface-2);cursor:pointer;}
+  .sr-item .sr-title{font-size:12.5px;font-weight:700;}
+  .sr-item .sr-sub{font-size:11px;color:var(--ink-3);margin-top:2px;}
+
+  /* ---------- Login ---------- */
+  .login-screen{
+    position:fixed;inset:0;z-index:200;
+    background:linear-gradient(160deg,#0F2933,#123340 55%,#1F4E5F);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .login-card{
+    background:var(--surface);border-radius:16px;
+    width:100%;max-width:380px;padding:28px 26px 24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.35);
+  }
+  .login-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+  .login-title{font-size:15px;font-weight:800;color:var(--ink);line-height:1.3;}
+  .login-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px;}
+  .google-btn{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:10px;
+    border:1px solid var(--border-strong);background:var(--surface);
+    border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--ink);
+  }
+  .google-btn:hover{background:var(--surface-2);}
+  .login-divider{
+    display:flex;align-items:center;gap:10px;margin:16px 0;
+    font-size:11px;color:var(--ink-3);font-weight:600;
+  }
+  .login-divider::before,.login-divider::after{content:"";flex:1;height:1px;background:var(--border);}
+  .login-field{margin-bottom:12px;}
+  .login-field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-2);margin-bottom:5px;}
+  .login-field input, .login-field select{
+    width:100%;border:1px solid var(--border-strong);border-radius:8px;
+    padding:9px 11px;font-size:13px;font-family:inherit;color:var(--ink);background:var(--surface);
+  }
+  .login-field input:focus, .login-field select:focus{outline:2px solid var(--brand);outline-offset:0;border-color:var(--brand);}
+  .login-note{font-size:11px;color:var(--ink-3);margin-top:12px;line-height:1.5;text-align:center;}
+  .chooser-item{
+    display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+    border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px;
+    background:var(--surface);
+  }
+  .chooser-item:hover{background:var(--surface-2);border-color:var(--border-strong);}
+  .chooser-avatar{
+    width:32px;height:32px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:#fff;
+  }
+  .chooser-name{font-size:12.8px;font-weight:700;color:var(--ink);}
+  .chooser-email{font-size:11px;color:var(--ink-3);margin-top:1px;}
+
+  .profile-header{padding:10px 10px 12px;border-bottom:1px solid var(--border);margin-bottom:6px;}
+  .profile-header .pname{font-size:12.8px;font-weight:700;color:var(--ink);}
+  .profile-header .pemail{font-size:11px;color:var(--ink-3);margin-top:1px;}
+  .role-menu-label{font-size:10.5px;font-weight:700;color:var(--ink-3);padding:6px 9px 4px;letter-spacing:.02em;}
+  .signout-opt{color:var(--red) !important;}
+
+  .queue-card{
+    background:linear-gradient(180deg,var(--brand-soft),var(--surface) 55%);
+    border:1px solid var(--steel);border-radius:var(--radius-m);
+    padding:16px 18px;margin-bottom:22px;
+  }
+  .queue-head{display:flex;align-items:center;gap:9px;margin-bottom:4px;}
+  .queue-head .qtitle{font-size:14.5px;font-weight:800;color:var(--brand-ink);}
+  .queue-sub{font-size:12px;color:var(--ink-2);margin-bottom:12px;}
+  .queue-empty{font-size:12.8px;color:var(--ink-2);padding:8px 2px;}
+  .queue-item{
+    display:flex;gap:11px;align-items:flex-start;
+    background:var(--surface);border:1px solid var(--border);border-radius:9px;
+    padding:11px 13px;margin-bottom:8px;
+  }
+  .queue-item:last-child{margin-bottom:0;}
+  .queue-item:hover{border-color:var(--border-strong);cursor:pointer;}
+  .queue-item .qtext{font-size:12.8px;font-weight:700;color:var(--ink);flex:1;}
+  .age-pill{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0;}
+  .age-red{background:var(--red-soft);color:var(--red);}
+  .age-amber{background:var(--amber-soft);color:var(--amber);}
+
+  /* ---------- Dashboard zones ---------- */
+  .zone-box{
+    border-radius:var(--radius-l);
+    padding:18px 18px 4px;
+    margin-bottom:22px;
+    background: color-mix(in srgb, var(--zone-color) 5%, var(--surface));
+    border:1px solid color-mix(in srgb, var(--zone-color) 22%, var(--border));
+  }
+  .zone-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+  .zone-dot{width:9px;height:9px;border-radius:3px;background:var(--zone-color);flex-shrink:0;}
+  .zone-title{font-size:11.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--zone-color);}
+  .zone-box .card{border-color:color-mix(in srgb, var(--zone-color) 14%, var(--border));}
+
+  @media print{
+    .sidebar, .topbar, .btn, .section-link, .back-link, .sidebar-scrim{display:none !important;}
+    .app{display:block;}
+    .content{padding:0;}
+    body{background:#fff;}
+    .card, .table-wrap, .cmd-card, .conflict-card, .verify-card, .insight-card{break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="brand-mark" style="width:44px;height:44px;border-radius:11px">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 11h.01M15 11h.01M9 15h.01M15 15h.01" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="login-title">Construction Command Center</div>
+        <div class="login-sub" id="loginTagline"></div>
+      </div>
+    </div>
+
+    <div id="loginBody">
+      <button class="google-btn" id="googleBtn">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.5 6 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 16 19 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.5 6 29.5 4 24 4c-7.5 0-14 4.2-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.6-5.2l-6.3-5.3C29.3 35.4 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.9 39.7 16.4 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.3 5.3C40.9 36 44 30.5 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+        <span id="googleBtnLabel">Continue with Google</span>
+      </button>
+
+      <div class="login-divider"><span id="loginOrLabel">or</span></div>
+
+      <div class="login-field">
+        <label id="lblName">Full name</label>
+        <input type="text" id="loginName" placeholder="Veera Wongson">
+      </div>
+      <div class="login-field">
+        <label id="lblEmail">Email</label>
+        <input type="email" id="loginEmail" placeholder="you@company.com">
+      </div>
+      <div class="login-field">
+        <label id="lblRole">Sign in as</label>
+        <select id="loginRole">
+          <option value="owner">Owner</option>
+          <option value="consultant" selected>Consultant</option>
+          <option value="contractor">Contractor</option>
+          <option value="designer">Designer</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="emailSignInBtn" style="width:100%;justify-content:center;margin-top:4px">Sign In</button>
+      <div class="login-note" id="loginNote"></div>
+    </div>
+
+    <div id="chooserBody" style="display:none">
+      <div class="login-note" style="margin-bottom:10px" id="chooserTitle">Choose an account</div>
+      <div id="chooserList"></div>
+      <button class="back-link" id="chooserBack" style="margin-top:10px;margin-bottom:0">← Back</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="appRoot" style="display:none">
+
+
+  <div class="sidebar-scrim" id="scrim" onclick="toggleSidebar(false)"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 11h.01M15 11h.01M9 15h.01M15 15h.01" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <div class="brand-name">Command Center</div>
+        <div class="brand-sub" id="brandSub"></div>
+      </div>
+    </div>
+
+    <div class="nav" id="navList"></div>
+
+    <div class="sidebar-foot" id="sidebarFoot"></div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" style="display:none" id="hamburger" onclick="toggleSidebar(true)">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+      <div class="search" style="position:relative">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="searchInput" type="text" oninput="onSearch(this.value)" onfocus="onSearch(this.value)">
+        <div class="search-results" id="searchResults"></div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="lang-switch" id="langSwitch">
+          <button class="lang-opt" data-lang="th">ไทย</button>
+          <button class="lang-opt" data-lang="en">EN</button>
+        </div>
+
+        <div style="position:relative">
+          <button class="icon-btn" onclick="togglePanel('notif')">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.7 21a2 2 0 01-3.4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span class="dot-badge"></span>
+          </button>
+          <div class="notif-panel" id="panel-notif">
+            <div class="notif-head" id="notifHead"></div>
+            <div id="notifList"></div>
+          </div>
+        </div>
+
+        <div class="role-switch">
+          <button class="role-btn" onclick="togglePanel('role')">
+            <span class="role-avatar" id="roleAvatar">C</span>
+            <span id="roleBtnLabel"></span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="role-menu" id="panel-role" style="width:230px"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="content-inner" id="view"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ============================= I18N ============================= */
+
+let currentLang = "en"; // "en" | "th"
+
+const STR = {
+  searchPlaceholder:{en:"Search commands, tasks, rooms, documents…", th:"ค้นหาคำสั่ง งาน ห้อง เอกสาร…"},
+  noResultsFor:{en:'No results for', th:'ไม่พบผลลัพธ์สำหรับ'},
+  notifications:{en:"Notifications", th:"การแจ้งเตือน"},
+  viewingAs:{en:"Viewing as:", th:"มุมมอง:"},
+  brandSub:{en:"Construction Ops", th:"งานก่อสร้าง"},
+  sidebarFoot:{en:"High-Rise Building<br>Construction Project", th:"โครงการก่อสร้าง<br>อาคารสูง"},
+
+  // roles
+  role_owner:{en:"Owner", th:"เจ้าของโครงการ"},
+  role_consultant:{en:"Consultant", th:"ที่ปรึกษา"},
+  role_contractor:{en:"Contractor", th:"ผู้รับเหมา"},
+  role_designer:{en:"Designer", th:"ผู้ออกแบบ"},
+
+  // nav groups
+  ng_overview:{en:"Overview", th:"ภาพรวม"},
+  ng_commands:{en:"Commands", th:"คำสั่งงาน"},
+  ng_progress:{en:"Progress", th:"ความคืบหน้า"},
+  ng_evidence:{en:"Evidence & Risk", th:"หลักฐาน & ความเสี่ยง"},
+  ng_reference:{en:"Reference", th:"เอกสารอ้างอิง"},
+
+  // nav items
+  nav_dashboard:{en:"Dashboard", th:"แดชบอร์ด"},
+  nav_commands:{en:"Command Center", th:"ศูนย์บัญชาการ"},
+  nav_impact:{en:"Impact Map", th:"แผนผังผลกระทบ"},
+  nav_progress:{en:"Progress", th:"ความคืบหน้า"},
+  nav_verification:{en:"Verification Queue", th:"คิวตรวจสอบ"},
+  nav_evidence:{en:"Evidence", th:"หลักฐาน"},
+  nav_actions:{en:"Action Required", th:"งานที่ต้องดำเนินการ"},
+  nav_conflicts:{en:"Data Conflict", th:"ข้อมูลขัดแย้ง"},
+  nav_schedule:{en:"Schedule Impact", th:"ผลกระทบต่อแผนงาน"},
+  nav_insight:{en:"AI Insight", th:"ข้อมูลเชิงลึกจาก AI"},
+  nav_documents:{en:"Documents", th:"เอกสารโครงการ"},
+  nav_about:{en:"About Project", th:"เกี่ยวกับโครงการ"},
+
+  // project strip
+  projectName:{en:"High-Rise Building Construction Project", th:"โครงการก่อสร้างอาคารสูง"},
+  projectMeta:{en:"Construction Command Center · Consultant: Site Ops Team", th:"ศูนย์บัญชาการงานก่อสร้าง · ที่ปรึกษา: ทีมปฏิบัติการหน้างาน"},
+  active:{en:"Active", th:"กำลังดำเนินการ"},
+
+  // dashboard
+  crumb_overview:{en:"Overview", th:"ภาพรวม"},
+  title_dashboard:{en:"Dashboard", th:"แดชบอร์ด"},
+  sub_dashboard:{en:"Live status across commands, progress and verification for the current project.", th:"สถานะล่าสุดของคำสั่งงาน ความคืบหน้า และการตรวจสอบของโครงการ"},
+  stat_overall:{en:"Overall Progress", th:"ความคืบหน้ารวม"},
+  stat_planned:{en:"Planned Progress", th:"แผนงานที่วางไว้"},
+  stat_verified:{en:"Consultant Verified", th:"ยืนยันโดยที่ปรึกษา"},
+  stat_variance:{en:"Schedule Variance", th:"ความคลาดเคลื่อนแผนงาน"},
+  stat_delayed:{en:"Delayed Tasks", th:"งานที่ล่าช้า"},
+  stat_pending:{en:"Pending Verification", th:"รอการตรวจสอบ"},
+  stat_active_cmd:{en:"Active Commands", th:"คำสั่งงานที่ดำเนินการอยู่"},
+  stat_critical:{en:"Critical Issues", th:"ปัญหาวิกฤต"},
+  delta_vs_planned:{en:"vs 82% planned", th:"เทียบแผน 82%"},
+  delta_baseline:{en:"Baseline target", th:"เป้าหมายตามแผนหลัก"},
+  delta_verified:{en:"−12% vs reported", th:"ต่ำกว่ารายงาน 12%"},
+  delta_behind:{en:"Behind baseline", th:"ล่าช้ากว่าแผนหลัก"},
+  delta_across:{en:"Across 3 commands", th:"กระจายอยู่ใน 3 คำสั่งงาน"},
+  delta_awaiting:{en:"Awaiting consultant", th:"รอที่ปรึกษาตรวจสอบ"},
+  delta_thisweek:{en:"3 issued this week", th:"ออกใหม่ 3 รายการสัปดาห์นี้"},
+  delta_immediate:{en:"Needs immediate action", th:"ต้องดำเนินการทันที"},
+  todays_construction:{en:"Today's Construction", th:"งานก่อสร้างวันนี้"},
+  view_all_progress:{en:"View all progress →", th:"ดูความคืบหน้าทั้งหมด →"},
+  view_all:{en:"View all →", th:"ดูทั้งหมด →"},
+  recent_commands:{en:"Recent Commands", th:"คำสั่งงานล่าสุด"},
+  action_required:{en:"Action Required", th:"งานที่ต้องดำเนินการ"},
+  evidence_btn:{en:"Evidence", th:"หลักฐาน"},
+
+  // commands
+  crumb_commands:{en:"Commands", th:"คำสั่งงาน"},
+  title_commands:{en:"Command Center", th:"ศูนย์บัญชาการ"},
+  sub_commands:{en:"Every instruction issued by the Owner, tracked from document to completed work.", th:"คำสั่งงานทุกรายการจากเจ้าของโครงการ ติดตามได้ตั้งแต่เอกสารจนถึงงานที่เสร็จสมบูรณ์"},
+  issued_by:{en:"Issued by", th:"ออกคำสั่งโดย"},
+  date_lbl:{en:"Date", th:"วันที่"},
+  deadline_lbl:{en:"Deadline", th:"กำหนดเสร็จ"},
+  priority_lbl:{en:"Priority", th:"ความสำคัญ"},
+
+  back_to_commands:{en:"Back to Command Center", th:"กลับสู่ศูนย์บัญชาการ"},
+  related_tasks:{en:"Related Tasks", th:"งานย่อยที่เกี่ยวข้อง"},
+  cmd_impact_map:{en:"Command Impact Map", th:"แผนผังผลกระทบของคำสั่งงาน"},
+  impact_preview_title:{en:"See how this command flows to schedule & cost →", th:"ดูผลกระทบของคำสั่งนี้ต่อแผนงานและงบประมาณ →"},
+  open_map:{en:"Open Map", th:"เปิดแผนผัง"},
+  cmd_information:{en:"Command Information", th:"ข้อมูลคำสั่งงาน"},
+  cmd_id_lbl:{en:"Command ID", th:"รหัสคำสั่งงาน"},
+  issuer_lbl:{en:"Issuer", th:"ผู้ออกคำสั่ง"},
+  ref_doc_lbl:{en:"Reference Doc", th:"เอกสารอ้างอิง"},
+  area_lbl:{en:"Area", th:"พื้นที่"},
+  status_lbl:{en:"Status", th:"สถานะ"},
+  edit_command:{en:"Edit Command", th:"แก้ไขคำสั่งงาน"},
+
+  status_done:{en:"Done", th:"เสร็จสิ้น"},
+  status_notstarted:{en:"Not Started", th:"ยังไม่เริ่ม"},
+  status_inprogress:{en:"In Progress", th:"กำลังดำเนินการ"},
+  status_completed:{en:"Completed", th:"เสร็จสมบูรณ์"},
+  status_delayed:{en:"Delayed", th:"ล่าช้า"},
+  status_ontrack:{en:"On Track", th:"เป็นไปตามแผน"},
+  status_ahead:{en:"Ahead", th:"เร็วกว่าแผน"},
+  status_atrisk:{en:"At Risk", th:"เสี่ยงล่าช้า"},
+
+  // impact map
+  back_to:{en:"Back to", th:"กลับสู่"},
+  impact_title:{en:"From command to consequence", th:"จากคำสั่งงานสู่ผลลัพธ์"},
+  impact_sub_pre:{en:"Tracing", th:"ติดตาม"},
+  impact_sub_post:{en:"through every downstream task, and what it costs the schedule and budget.", th:"ผ่านทุกงานย่อยที่เกี่ยวข้อง พร้อมผลกระทบต่อแผนงานและงบประมาณ"},
+  issued_word:{en:"Issued", th:"ออกคำสั่งเมื่อ"},
+  schedule_impact_lbl:{en:"Schedule Impact", th:"ผลกระทบต่อแผนงาน"},
+  cost_impact_lbl:{en:"Estimated Cost Impact", th:"ผลกระทบต่องบประมาณโดยประมาณ"},
+  affected_area_lbl:{en:"Affected Area", th:"พื้นที่ที่ได้รับผลกระทบ"},
+  affected_activities_lbl:{en:"Affected Activities", th:"กิจกรรมที่ได้รับผลกระทบ"},
+
+  // progress
+  crumb_progress:{en:"Progress", th:"ความคืบหน้า"},
+  title_progress:{en:"Progress Management", th:"บริหารความคืบหน้า"},
+  sub_progress:{en:"Comparing what was planned, what the contractor reports, and what the consultant has verified on site.", th:"เปรียบเทียบแผนงานที่วางไว้ รายงานจากผู้รับเหมา และผลตรวจสอบจริงหน้างานโดยที่ปรึกษา"},
+  contractor_reported:{en:"Contractor Reported", th:"ผู้รับเหมารายงาน"},
+  discrepancy_title:{en:"Progress Discrepancy — +12%", th:"ความคลาดเคลื่อนของความคืบหน้า — +12%"},
+  discrepancy_body:{en:"Contractor reported progress is higher than consultant verified progress. This does not determine fault — review the underlying evidence to understand the gap.", th:"ความคืบหน้าที่ผู้รับเหมารายงานสูงกว่าที่ที่ปรึกษายืนยัน ข้อมูลนี้ไม่ได้ชี้ว่าฝ่ายใดผิด — ควรตรวจสอบหลักฐานประกอบเพื่อทำความเข้าใจความคลาดเคลื่อน"},
+  review_evidence:{en:"Review Evidence", th:"ตรวจสอบหลักฐาน"},
+  today_detail:{en:"Today's Construction — Detail", th:"งานก่อสร้างวันนี้ — รายละเอียด"},
+  th_task:{en:"Task", th:"งาน"},
+  th_contractor:{en:"Contractor", th:"ผู้รับเหมา"},
+  th_progress:{en:"Progress", th:"ความคืบหน้า"},
+  th_status:{en:"Status", th:"สถานะ"},
+  th_evidence:{en:"Evidence", th:"หลักฐาน"},
+  th_updated:{en:"Updated", th:"อัปเดตล่าสุด"},
+
+  // verification
+  crumb_verify:{en:"Progress Verification", th:"การตรวจสอบความคืบหน้า"},
+  title_verify:{en:"Verification Queue", th:"คิวตรวจสอบความคืบหน้า"},
+  sub_verify:{en:"Contractor-reported completion against on-site evidence. Confirm or send back for revision.", th:"เปรียบเทียบความคืบหน้าที่ผู้รับเหมารายงานกับหลักฐานหน้างาน ยืนยันหรือส่งกลับให้แก้ไข"},
+  ai_flagged:{en:"AI Flagged", th:"AI ตรวจพบความผิดปกติ"},
+  routine:{en:"Routine", th:"ปกติ"},
+  col_contractor_report:{en:"CONTRACTOR REPORT", th:"รายงานจากผู้รับเหมา"},
+  col_ai_estimate:{en:"AI VISUAL ESTIMATE", th:"AI ประเมินจากภาพ"},
+  col_consultant_verify:{en:"CONSULTANT VERIFICATION", th:"การยืนยันโดยที่ปรึกษา"},
+  pending:{en:"Pending", th:"รอดำเนินการ"},
+  potential_discrepancy:{en:"Potential discrepancy detected", th:"ตรวจพบความคลาดเคลื่อนที่อาจเกิดขึ้น"},
+  visual_evidence_inconsistent:{en:"Visual evidence appears inconsistent with the reported progress. Review before verifying.", th:"หลักฐานภาพดูเหมือนจะไม่สอดคล้องกับความคืบหน้าที่รายงาน ควรตรวจสอบก่อนยืนยัน"},
+  verify_pct:{en:"Verify", th:"ยืนยัน"},
+  reject_revision:{en:"Reject / Request Revision", th:"ปฏิเสธ / ขอแก้ไข"},
+  awaiting_review:{en:"Awaiting consultant review", th:"รอที่ปรึกษาตรวจสอบ"},
+  view_evidence:{en:"View Evidence", th:"ดูหลักฐาน"},
+  verified_pct:{en:"Verified", th:"ยืนยันแล้ว"},
+  revision_required:{en:"Revision Required", th:"ต้องแก้ไข"},
+
+  // evidence
+  crumb_evidence:{en:"Evidence", th:"หลักฐาน"},
+  title_evidence:{en:"Site Evidence", th:"หลักฐานหน้างาน"},
+  sub_evidence:{en:"Photos, daily reports and inspection records, each linked to a command and task for a full audit trail.", th:"รูปภาพ รายงานประจำวัน และบันทึกการตรวจสอบ เชื่อมโยงกับคำสั่งงานและงานย่อยเพื่อการตรวจสอบย้อนหลังที่สมบูรณ์"},
+  ai_flag:{en:"AI Flag", th:"AI แจ้งเตือน"},
+  uploaded_by:{en:"Uploaded by", th:"อัปโหลดโดย"},
+  photo_hash:{en:"Photo #", th:"รูปภาพ #"},
+  ai_photo_analysis:{en:"AI Photo Analysis", th:"AI วิเคราะห์รูปภาพ"},
+  reported_progress_lbl:{en:"REPORTED PROGRESS", th:"ความคืบหน้าที่รายงาน"},
+  visual_progress_lbl:{en:"ESTIMATED VISUAL PROGRESS", th:"ความคืบหน้าประเมินจากภาพ"},
+  difference_lbl:{en:"DIFFERENCE", th:"ส่วนต่าง"},
+  potential_inconsistency:{en:"Potential Inconsistency", th:"อาจมีความไม่สอดคล้องกัน"},
+  visual_inconsistent_body:{en:"Visual evidence appears inconsistent with reported progress.", th:"หลักฐานภาพดูเหมือนจะไม่สอดคล้องกับความคืบหน้าที่รายงาน"},
+  consistent_with_report:{en:"Consistent with report", th:"สอดคล้องกับรายงาน"},
+  consistent_body:{en:"Visual estimate is within expected range of the reported progress.", th:"ค่าประเมินจากภาพอยู่ในช่วงที่สอดคล้องกับความคืบหน้าที่รายงาน"},
+
+  // actions
+  crumb_actions:{en:"Action Required", th:"งานที่ต้องดำเนินการ"},
+  title_actions:{en:"Action Required", th:"งานที่ต้องดำเนินการ"},
+  sub_actions:{en:"Everything that needs a person to move it forward, ranked by urgency.", th:"รายการที่ต้องมีผู้รับผิดชอบดำเนินการต่อ เรียงตามความเร่งด่วน"},
+  lvl_critical:{en:"Critical", th:"วิกฤต"},
+  lvl_attention:{en:"Attention", th:"ต้องเฝ้าระวัง"},
+  lvl_followup:{en:"Follow-up", th:"ติดตามผล"},
+  responsible_lbl:{en:"Responsible", th:"ผู้รับผิดชอบ"},
+  related_lbl:{en:"Related", th:"ที่เกี่ยวข้อง"},
+
+  // conflicts
+  crumb_conflicts:{en:"Data Conflict", th:"ข้อมูลขัดแย้ง"},
+  title_conflicts:{en:"Data Conflict", th:"ข้อมูลขัดแย้ง"},
+  sub_conflicts:{en:"When contractor reports, daily logs, and AI evidence analysis disagree, the consultant's verified figure is the record of truth — but every source is kept for the audit trail.", th:"เมื่อรายงานผู้รับเหมา บันทึกประจำวัน และการวิเคราะห์หลักฐานของ AI ไม่ตรงกัน ตัวเลขที่ที่ปรึกษายืนยันจะถือเป็นข้อมูลหลักของโครงการ — แต่ยังเก็บข้อมูลทุกแหล่งไว้เพื่อการตรวจสอบย้อนหลัง"},
+  resolve:{en:"Resolve", th:"ตัดสินใจ"},
+  col_daily_report:{en:"DAILY REPORT", th:"รายงานประจำวัน"},
+  col_ai_evidence:{en:"AI EVIDENCE ANALYSIS", th:"AI วิเคราะห์หลักฐาน"},
+  col_consultant_verified:{en:"CONSULTANT VERIFIED", th:"ยืนยันโดยที่ปรึกษา"},
+  conflict_footer:{en:"Consultant Verified Progress is treated as the project's main source of truth. All other figures remain on record for audit purposes.", th:"ความคืบหน้าที่ยืนยันโดยที่ปรึกษาถือเป็นข้อมูลหลักของโครงการ ส่วนตัวเลขอื่นยังคงถูกเก็บไว้เพื่อการตรวจสอบย้อนหลัง"},
+
+  // schedule
+  crumb_schedule:{en:"Schedule Impact", th:"ผลกระทบต่อแผนงาน"},
+  title_schedule:{en:"Schedule Impact", th:"ผลกระทบต่อแผนงาน"},
+  sub_schedule:{en:"How individual delays roll up into the project's overall completion forecast.", th:"ความล่าช้าของแต่ละงานส่งผลต่อกำหนดเสร็จรวมของโครงการอย่างไร"},
+  original_completion:{en:"Original Completion", th:"กำหนดเสร็จเดิม"},
+  current_forecast:{en:"Current Forecast", th:"คาดการณ์ปัจจุบัน"},
+  variance_lbl:{en:"Variance", th:"ความคลาดเคลื่อน"},
+  delayed_activities:{en:"Delayed Activities & Related Commands", th:"กิจกรรมที่ล่าช้าและคำสั่งงานที่เกี่ยวข้อง"},
+  th_activity:{en:"Activity", th:"กิจกรรม"},
+  th_related_cmd:{en:"Related Command", th:"คำสั่งงานที่เกี่ยวข้อง"},
+  th_baseline_date:{en:"Baseline Date", th:"วันที่ตามแผนหลัก"},
+  th_current_forecast:{en:"Current Forecast", th:"คาดการณ์ปัจจุบัน"},
+  th_variance:{en:"Variance", th:"ความคลาดเคลื่อน"},
+  critical_milestones:{en:"Critical Milestones", th:"เหตุการณ์สำคัญของโครงการ"},
+
+  // insight
+  crumb_insight:{en:"AI Insight", th:"ข้อมูลเชิงลึกจาก AI"},
+  title_insight:{en:"AI Insight", th:"ข้อมูลเชิงลึกจาก AI"},
+  sub_insight:{en:"Patterns the assistant has detected across commands, progress and evidence. AI detects — the consultant decides.", th:"รูปแบบที่ AI ตรวจพบจากคำสั่งงาน ความคืบหน้า และหลักฐานต่างๆ — AI เป็นผู้ตรวจพบ ที่ปรึกษาเป็นผู้ตัดสินใจ"},
+  impact_word:{en:"IMPACT", th:"ผลกระทบ"},
+  potential_schedule_impact:{en:"POTENTIAL SCHEDULE IMPACT", th:"ผลกระทบต่อแผนงานที่อาจเกิดขึ้น"},
+  ai_detects_title:{en:"AI detects. Human decides.", th:"AI ตรวจพบ มนุษย์เป็นผู้ตัดสินใจ"},
+  ai_detects_body:{en:"These insights flag patterns worth reviewing — potential delays, discrepancies and risks. They are not final determinations. All confirmations and rejections remain with the Consultant.", th:"ข้อมูลเชิงลึกเหล่านี้เป็นเพียงการชี้ให้เห็นรูปแบบที่ควรตรวจสอบ เช่น ความล่าช้า ความคลาดเคลื่อน หรือความเสี่ยงที่อาจเกิดขึ้น ไม่ใช่ข้อสรุปสุดท้าย การยืนยันหรือปฏิเสธทั้งหมดยังคงเป็นหน้าที่ของที่ปรึกษา"},
+
+  // documents
+  crumb_documents:{en:"Documents", th:"เอกสารโครงการ"},
+  title_documents:{en:"Project Documents", th:"เอกสารโครงการ"},
+  sub_documents:{en:"Every document, organized by type. Owner commands are linked directly to the tasks they generate.", th:"เอกสารทั้งหมดจัดหมวดหมู่ตามประเภท คำสั่งงานจากเจ้าของโครงการเชื่อมโยงโดยตรงกับงานที่เกิดขึ้น"},
+  view_linked_command:{en:"View linked command →", th:"ดูคำสั่งงานที่เชื่อมโยง →"},
+  open_word:{en:"Open", th:"เปิด"},
+
+  // about
+  eyebrow_project_info:{en:"PROJECT INFORMATION", th:"ข้อมูลโครงการ"},
+  about_flow:{en:"Command → Work → Evidence → Verification → Impact", th:"คำสั่งงาน → งาน → หลักฐาน → การตรวจสอบ → ผลลัพธ์"},
+  core_concept:{en:"Core Concept", th:"แนวคิดหลัก"},
+  core_concept_quote:{en:'"Turning construction commands from paper into work that can be tracked all the way to real results."', th:'“เปลี่ยนคำสั่งก่อสร้างจากเอกสาร ให้กลายเป็นงานที่ติดตามได้จนถึงผลลัพธ์จริง”'},
+  core_concept_body:{en:"Construction information today is scattered — official letters, PDFs, spreadsheets, schedules, daily reports, chat messages, site photos, contractor reports and consultant reports all live in different places. CCC brings them into a single source of truth, and — critically — connects every Owner command to the actual tasks, evidence and schedule impact it creates.", th:"ข้อมูลงานก่อสร้างในปัจจุบันกระจัดกระจายอยู่หลายแหล่ง ทั้งหนังสือราชการ PDF Excel ตารางงาน รายงานประจำวัน ข้อความแชท รูปภาพหน้างาน รายงานผู้รับเหมา และรายงานที่ปรึกษา CCC รวบรวมข้อมูลเหล่านี้ให้เป็นแหล่งข้อมูลเดียว และที่สำคัญคือเชื่อมโยงคำสั่งงานทุกรายการของเจ้าของโครงการเข้ากับงานจริง หลักฐาน และผลกระทบต่อแผนงานที่เกิดขึ้น"},
+  problems_title:{en:"Problems This Addresses", th:"ปัญหาที่ระบบนี้แก้ไข"},
+  problem_1:{en:"Data reported by different parties doesn't match", th:"ข้อมูลที่รายงานโดยแต่ละฝ่ายไม่ตรงกัน"},
+  problem_2:{en:"Contractor-reported progress may not match consultant verification", th:"ความคืบหน้าที่ผู้รับเหมารายงานอาจไม่ตรงกับผลตรวจสอบของที่ปรึกษา"},
+  problem_3:{en:"Owner commands sit in PDFs, disconnected from real work", th:"คำสั่งงานของเจ้าของโครงการอยู่ใน PDF โดยไม่เชื่อมโยงกับงานจริง"},
+  problem_4:{en:"Impact of a command on the schedule isn't visible", th:"ไม่เห็นผลกระทบของคำสั่งงานต่อแผนงาน"},
+  problem_5:{en:"It's unclear which tasks need urgent attention", th:"ไม่ทราบว่างานใดต้องเร่งดำเนินการ"},
+  problem_6:{en:"Photo and document evidence is scattered", th:"หลักฐานรูปภาพและเอกสารกระจัดกระจาย"},
+  problem_7:{en:"Tracking progress requires heavy manual data-gathering", th:"การติดตามความคืบหน้าต้องใช้คนรวบรวมข้อมูลจำนวนมาก"},
+  ai_principle_title:{en:"AI Assistant, Not Decision-Maker", th:"AI เป็นผู้ช่วย ไม่ใช่ผู้ตัดสินใจ"},
+  ai_principle_body:{en:'The AI in this system reads command documents, extracts key details, breaks commands into tasks, analyzes progress, flags anomalies, compares contractor vs. consultant data, reviews photo evidence, and surfaces schedule risk.<br><br>The final decision always belongs to a human — specifically the Consultant. Insights are always framed as <i>potential</i>, <i>possible</i>, <i>detected</i>, or <i>requires review</i> — never as a final verdict.<br><br><b style="color:var(--ink)">Principle: AI detects. Human decides.</b>', th:'AI ในระบบนี้ทำหน้าที่อ่านเอกสารคำสั่งงาน สกัดข้อมูลสำคัญ แตกคำสั่งงานเป็นงานย่อย วิเคราะห์ความคืบหน้า ตรวจจับความผิดปกติ เปรียบเทียบข้อมูลระหว่างผู้รับเหมาและที่ปรึกษา ตรวจสอบหลักฐานรูปภาพ และแจ้งเตือนความเสี่ยงต่อแผนงาน<br><br>การตัดสินใจขั้นสุดท้ายเป็นของมนุษย์เสมอ โดยเฉพาะที่ปรึกษา ข้อมูลเชิงลึกทุกรายการจะใช้คำว่า <i>อาจ</i> <i>เป็นไปได้</i> <i>ตรวจพบ</i> หรือ <i>ต้องตรวจสอบ</i> ไม่ใช่ข้อสรุปสุดท้าย<br><br><b style="color:var(--ink)">หลักการ: AI ตรวจพบ มนุษย์เป็นผู้ตัดสินใจ</b>'},
+  user_roles_title:{en:"User Roles", th:"บทบาทผู้ใช้งาน"},
+  perm_owner_title:{en:"Owner", th:"เจ้าของโครงการ"},
+  perm_owner_items:{en:["Issue commands","View project overview","View progress","View schedule","View issues","View verification results"], th:["ออกคำสั่งงาน","ดูภาพรวมโครงการ","ดูความคืบหน้า","ดูแผนงาน","ดูปัญหา","ดูผลการตรวจสอบ"]},
+  perm_consultant_title:{en:"Consultant", th:"ที่ปรึกษา"},
+  perm_consultant_items:{en:["Review commands","Break down / review tasks","Set deadlines","Verify progress","Verify evidence","Reject progress","Analyze schedule impact","Review data conflicts","Review AI insights"], th:["ตรวจสอบคำสั่งงาน","แตก/ตรวจสอบงานย่อย","กำหนดเส้นตาย","ตรวจสอบความคืบหน้า","ตรวจสอบหลักฐาน","ปฏิเสธความคืบหน้า","วิเคราะห์ผลกระทบต่อแผนงาน","ตรวจสอบข้อมูลขัดแย้ง","ตรวจสอบข้อมูลเชิงลึกจาก AI"]},
+  perm_contractor_title:{en:"Contractor", th:"ผู้รับเหมา"},
+  perm_contractor_items:{en:["View received commands","View tasks","Update progress","Report work","Upload evidence & photos","Flag issues","View deadlines"], th:["ดูคำสั่งงานที่ได้รับ","ดูงานย่อย","อัปเดตความคืบหน้า","รายงานผลงาน","อัปโหลดหลักฐานและรูปภาพ","แจ้งปัญหา","ดูกำหนดเสร็จ"]},
+  perm_designer_title:{en:"Designer", th:"ผู้ออกแบบ"},
+  perm_designer_items:{en:["View commands affecting design","Upload / revise drawings","Respond to design clarification requests","Review as-built vs design intent","View project overview","Comment on evidence photos"], th:["ดูคำสั่งงานที่กระทบต่องานออกแบบ","อัปโหลด/แก้ไขแบบก่อสร้าง","ตอบข้อซักถามเกี่ยวกับแบบ","ตรวจสอบงานจริงเทียบกับแบบที่ออกแบบไว้","ดูภาพรวมโครงการ","แสดงความคิดเห็นในหลักฐานภาพ"]},
+  about_prototype_title:{en:"About This Prototype", th:"เกี่ยวกับต้นแบบนี้"},
+  prepared_by:{en:"Prepared by", th:"จัดทำโดย"},
+  student_id:{en:"Student ID", th:"รหัสนักศึกษา"},
+  section_lbl:{en:"Section", th:"กลุ่มเรียน"},
+  project_type:{en:"Project type", th:"ประเภทผลงาน"},
+  project_type_val:{en:"Construction management web application prototype", th:"เว็บแอปพลิเคชันต้นแบบสำหรับบริหารงานก่อสร้าง"},
+
+  // export / print
+  export_report:{en:"Export / Print Report", th:"ส่งออก / พิมพ์รายงาน"},
+
+  // s-curve
+  scurve_title:{en:"Progress S-Curve", th:"กราฟความคืบหน้ารูปตัว S"},
+  scurve_sub:{en:"Cumulative progress by week — planned baseline against contractor-reported and consultant-verified actuals.", th:"ความคืบหน้าสะสมรายสัปดาห์ — เปรียบเทียบแผนงานหลักกับผลจริงที่ผู้รับเหมารายงานและที่ปรึกษายืนยัน"},
+  scurve_planned:{en:"Planned (Baseline)", th:"แผนงานหลัก"},
+  scurve_contractor:{en:"Contractor Reported", th:"ผู้รับเหมารายงาน"},
+  scurve_verified:{en:"Consultant Verified", th:"ที่ปรึกษายืนยัน"},
+  scurve_week:{en:"Week", th:"สัปดาห์"},
+
+  // nav / 3d
+  nav_progress3d:{en:"3D Progress Model", th:"แบบจำลอง 3D ความคืบหน้า"},
+  crumb_progress3d:{en:"3D Progress Model", th:"แบบจำลอง 3D ความคืบหน้า"},
+  title_progress3d:{en:"3D Progress Model", th:"แบบจำลอง 3D ความคืบหน้า"},
+  sub_progress3d:{en:"A simplified 3D representation of a typical floor section, colored by construction stage as of the selected report week. A prototype concept — production version would sync with the real BIM model.", th:"แบบจำลอง 3D อย่างง่ายของอาคารตัวอย่าง แสดงสีตามขั้นตอนการก่อสร้าง ณ สัปดาห์ที่รายงานที่เลือก — เป็นแนวคิดต้นแบบ หากพัฒนาต่อจริงจะเชื่อมกับโมเดล BIM จริงของโครงการ"},
+  d3_report_week:{en:"Report Week", th:"สัปดาห์ที่รายงาน"},
+  d3_current_stage:{en:"Current Stage", th:"ขั้นตอนปัจจุบัน"},
+  d3_legend:{en:"Legend", th:"คำอธิบายสัญลักษณ์"},
+  d3_legend_done:{en:"Completed", th:"เสร็จสิ้นแล้ว"},
+  d3_legend_active:{en:"In progress this week", th:"กำลังดำเนินการสัปดาห์นี้"},
+  d3_legend_pending:{en:"Not started", th:"ยังไม่เริ่ม"},
+  d3_floor:{en:"Floor", th:"ชั้น"},
+  d3_stage_site:{en:"Site preparation", th:"เตรียมพื้นที่ก่อสร้าง"},
+  d3_stage_foundation:{en:"Foundation & footing", th:"งานฐานราก"},
+  d3_stage_structure:{en:"Column & beam structure", th:"งานโครงสร้างเสา-คาน"},
+  d3_stage_wall_active:{en:"Masonry wall (in progress)", th:"งานก่ออิฐผนัง (กำลังดำเนินการ)"},
+  d3_stage_wall_done:{en:"Masonry wall (finished)", th:"งานก่ออิฐผนัง (เสร็จแล้ว)"},
+  d3_stage_roof:{en:"Roof & topping out", th:"งานหลังคาและโครงสร้างส่วนบนสุด"},
+  d3_open_full:{en:"Open Full 3D Progress Model →", th:"เปิดแบบจำลอง 3D ความคืบหน้าฉบับเต็ม →"},
+  d3_preview_caption:{en:"Floor 3 walls currently under construction (red) · Floors 1–2 structure & walls complete (gray)", th:"ผนังชั้น 3 กำลังก่อสร้าง (สีแดง) · โครงสร้างและผนังชั้น 1–2 เสร็จแล้ว (สีเทา)"},
+
+  // rfi / designer command
+  status_awaiting:{en:"Awaiting Response", th:"รอการตอบกลับ"},
+
+  // login / account
+  loginTagline:{en:"Sign in to collaborate across Owner, Consultant, Contractor & Designer.", th:"เข้าสู่ระบบเพื่อทำงานร่วมกันระหว่างเจ้าของโครงการ ที่ปรึกษา ผู้รับเหมา และผู้ออกแบบ"},
+  continueGoogle:{en:"Continue with Google", th:"ดำเนินการต่อด้วย Google"},
+  orLabel:{en:"or", th:"หรือ"},
+  lblName:{en:"Full name", th:"ชื่อ-นามสกุล"},
+  lblEmail:{en:"Email", th:"อีเมล"},
+  lblRole:{en:"Sign in as", th:"เข้าสู่ระบบในฐานะ"},
+  signIn:{en:"Sign In", th:"เข้าสู่ระบบ"},
+  loginNote:{en:"Prototype login — accounts are simulated for demo purposes. A production version would use real Google / email OAuth.", th:"หน้าล็อกอินนี้เป็นการจำลองสำหรับต้นแบบ หากพัฒนาเป็นระบบจริงจะเชื่อมต่อ Google / อีเมลจริงผ่าน OAuth"},
+  chooseAccount:{en:"Choose an account", th:"เลือกบัญชี"},
+  backWord:{en:"Back", th:"ย้อนกลับ"},
+  signOut:{en:"Sign out", th:"ออกจากระบบ"},
+  previewAs:{en:"Preview as (demo)", th:"ดูมุมมองเป็น (สำหรับสาธิต)"},
+  signedInAs:{en:"Signed in", th:"เข้าสู่ระบบแล้ว"},
+
+  // waiting on you
+  waiting_title:{en:"Waiting on You", th:"ติดที่คุณ"},
+  waiting_sub_owner:{en:"Approvals and decisions that are blocked until you act.", th:"รายการที่รออนุมัติหรือการตัดสินใจจากคุณ"},
+  waiting_sub_consultant:{en:"Verifications, RFIs and issues that need your review.", th:"รายการตรวจสอบ RFI และปัญหาที่รอการพิจารณาจากคุณ"},
+  waiting_sub_contractor:{en:"Overdue tasks and revisions that are on you to close out.", th:"งานที่ล่าช้าและรายการที่ต้องแก้ไขซึ่งเป็นหน้าที่ของคุณ"},
+  waiting_sub_designer:{en:"Clarifications the site is waiting on from you.", th:"ข้อชี้แจงที่หน้างานกำลังรอคำตอบจากคุณ"},
+  waiting_empty:{en:"Nothing waiting on you right now — nice work.", th:"ตอนนี้ไม่มีรายการที่ติดคุณอยู่ — เยี่ยมมาก"},
+  days_overdue:{en:"days", th:"วัน"},
+
+  // dashboard zones
+  zone_overview:{en:"Overview", th:"ภาพรวม"},
+  zone_progress:{en:"Progress & Tracking", th:"ความคืบหน้าและติดตามงาน"},
+  zone_commands:{en:"Commands", th:"คำสั่งงาน"},
+  zone_risk:{en:"Risk & Decisions", th:"ความเสี่ยงและการตัดสินใจ"},
+  zone_milestones:{en:"Milestones", th:"เหตุการณ์สำคัญ"},
+
+  // prototype vs production
+  proto_vs_prod_title:{en:"This Prototype vs. a Production System", th:"ต้นแบบนี้ เทียบกับระบบที่ใช้งานจริง"},
+  proto_shows_title:{en:"What This Prototype Demonstrates", th:"สิ่งที่ต้นแบบนี้แสดงให้เห็น"},
+  proto_shows_items:{en:[
+    "The full workflow — Command → Work → Evidence → Verification → Impact — with every screen linked by the same Command ID",
+    "Role-based views and permissions for Owner, Consultant, Contractor and Designer",
+    "The data-conflict logic: Consultant Verified Progress as the source of truth, with every source kept for audit",
+    "The AI-assistant framing — insights use cautious language and always route to human review",
+    "A bilingual (Thai/English), responsive interface ready for real users to click through"
+  ], th:[
+    "ขั้นตอนการทำงานแบบครบวงจร — คำสั่งงาน → งาน → หลักฐาน → การตรวจสอบ → ผลลัพธ์ — โดยทุกหน้าจอเชื่อมกันด้วย Command ID เดียวกัน",
+    "มุมมองและสิทธิ์การใช้งานตามบทบาทของเจ้าของโครงการ ที่ปรึกษา ผู้รับเหมา และผู้ออกแบบ",
+    "หลักการจัดการข้อมูลขัดแย้ง — ใช้ความคืบหน้าที่ที่ปรึกษายืนยันเป็นข้อมูลหลัก แต่เก็บทุกแหล่งไว้ตรวจสอบย้อนหลังได้",
+    "แนวคิด AI เป็นผู้ช่วย — ใช้ภาษาที่ระมัดระวังเสมอและส่งต่อให้มนุษย์ตัดสินใจทุกครั้ง",
+    "หน้าตาระบบสองภาษา (ไทย/อังกฤษ) ที่ตอบสนองทุกขนาดหน้าจอ พร้อมให้ผู้ใช้จริงคลิกทดลองได้"
+  ]},
+  proto_next_title:{en:"What a Production Build Would Add", th:"สิ่งที่ต้องเพิ่มเพื่อพัฒนาเป็นระบบจริง"},
+  proto_next_items:{en:[
+    "A real backend and database (e.g. Node.js + PostgreSQL) in place of the static demo data",
+    "Real Google / email authentication (OAuth) in place of the simulated login screen",
+    "Integrations to capture commands and reports from where people already work — LINE OA, email, cloud file storage (e.g. S3) for photos and documents",
+    "A trained AI vision model for photo-based progress analysis, in place of the simulated estimates shown here",
+    "Real-time push/email/LINE notifications, instead of in-app only",
+    "Multi-project support and an admin console for managing users and permissions"
+  ], th:[
+    "ระบบหลังบ้านและฐานข้อมูลจริง (เช่น Node.js + PostgreSQL) แทนที่ข้อมูลตัวอย่างแบบคงที่",
+    "ระบบยืนยันตัวตนจริงผ่าน Google/อีเมล (OAuth) แทนที่หน้าล็อกอินจำลอง",
+    "การเชื่อมต่อกับช่องทางที่คนทำงานอยู่แล้วจริง เช่น LINE OA อีเมล และพื้นที่เก็บไฟล์บนคลาวด์ (เช่น S3) สำหรับรูปภาพและเอกสาร",
+    "โมเดล AI วิเคราะห์ภาพที่ผ่านการฝึกจริง แทนที่ค่าประมาณจำลองที่แสดงอยู่ในต้นแบบนี้",
+    "การแจ้งเตือนแบบเรียลไทม์ผ่าน push/อีเมล/LINE แทนที่การแจ้งเตือนในแอปเท่านั้น",
+    "รองรับหลายโครงการพร้อมกัน และมีหน้าจัดการผู้ใช้งาน/สิทธิ์สำหรับผู้ดูแลระบบ"
+  ]},
+};
+
+function t(key){
+  const e = STR[key];
+  if(!e) return key;
+  return e[currentLang] || e.en;
+}
+function tl(key){ // returns array for current lang
+  const e = STR[key];
+  if(!e) return [];
+  return e[currentLang] || e.en;
+}
+function pick(obj){ // obj like {en:"...", th:"..."}
+  if(obj==null) return "";
+  if(typeof obj === "string") return obj;
+  return obj[currentLang] || obj.en;
+}
+
+/* ============================= DATA MODEL ============================= */
+
+const ROLES = {
+  owner:{ labelKey:"role_owner", short:{en:"O", th:"จ"} },
+  consultant:{ labelKey:"role_consultant", short:{en:"C", th:"ท"} },
+  contractor:{ labelKey:"role_contractor", short:{en:"T", th:"ร"} },
+  designer:{ labelKey:"role_designer", short:{en:"D", th:"อ"} }
+};
+let currentRole = "consultant";
+let currentUser = null; // {name, email, role, color}
+
+const DEMO_ACCOUNTS = [
+  {name:"Veera Wongson", email:"veera.wongson@gmail.com", role:"owner", color:"#B67B0E"},
+  {name:"Site Consultant Team", email:"consultant.ops@gmail.com", role:"consultant", color:"#1F4E5F"},
+  {name:"Siam Construct Co.", email:"pm.siamconstruct@gmail.com", role:"contractor", color:"#2C6CA6"},
+  {name:"Studio Arch Design", email:"studio.archdesign@gmail.com", role:"designer", color:"#1E8A5F"},
+];
+
+const NAV = [
+  {group:"ng_overview"},
+  {id:"dashboard", labelKey:"nav_dashboard", icon:"grid"},
+  {group:"ng_commands"},
+  {id:"commands", labelKey:"nav_commands", icon:"command", count:25},
+  {id:"impact", labelKey:"nav_impact", icon:"map"},
+  {group:"ng_progress"},
+  {id:"progress", labelKey:"nav_progress", icon:"trend"},
+  {id:"progress3d", labelKey:"nav_progress3d", icon:"cube"},
+  {id:"verification", labelKey:"nav_verification", icon:"check", count:12},
+  {group:"ng_evidence"},
+  {id:"evidence", labelKey:"nav_evidence", icon:"photo"},
+  {id:"actions", labelKey:"nav_actions", icon:"alert", count:6},
+  {id:"conflicts", labelKey:"nav_conflicts", icon:"layers"},
+  {id:"schedule", labelKey:"nav_schedule", icon:"calendar"},
+  {id:"insight", labelKey:"nav_insight", icon:"spark"},
+  {group:"ng_reference"},
+  {id:"documents", labelKey:"nav_documents", icon:"file"},
+  {id:"about", labelKey:"nav_about", icon:"info"},
+];
+
+const ICONS = {
+  grid:'<path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+  command:'<path d="M4 6h16M4 12h16M4 18h9" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="19" cy="18" r="2.3" stroke="currentColor" stroke-width="1.7"/>',
+  map:'<path d="M9 3l6 2.5L21 3v15l-6 2.5L9 18l-6 2.5V6L9 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 3v15M15 5.5v15" stroke="currentColor" stroke-width="1.7"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 7h6v6" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
+  check:'<path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>',
+  photo:'<rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.7"/><circle cx="9" cy="11" r="2" stroke="currentColor" stroke-width="1.7"/><path d="M21 17l-5.5-5.5a2 2 0 00-2.8 0L7 17" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  alert:'<path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>',
+  layers:'<path d="M12 3l9 5-9 5-9-5 9-5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M3 13l9 5 9-5M3 8l9 5 9-5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
+  spark:'<path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
+  file:'<path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+  info:'<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v6M12 7.5h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>',
+  cube:'<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 3v9m0 0l8-4.5M12 12l-8-4.5M12 12v9" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>',
+  print:'<path d="M6 9V3h12v6M6 18H4a1 1 0 01-1-1v-6a1 1 0 011-1h16a1 1 0 011 1v6a1 1 0 01-1 1h-2" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><rect x="6" y="14" width="12" height="7" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
+};
+
+const COMMANDS = [
+  {id:"COMMAND-025", subject:{en:"RFI: Confirm Beam Reinforcement Detail, Floor 12", th:"RFI: ขอยืนยันรายละเอียดเหล็กเสริมคาน ชั้น 12"}, issuer:"role_designer", date:{en:"21 Sep 2026", th:"21 ก.ย. 2569"}, status:"status_awaiting", statusColor:"blue", deadline:{en:"27 Sep 2026", th:"27 ก.ย. 2569"}, area:{en:"Building A / Floor 12", th:"อาคาร A / ชั้น 12"}, priority:{en:"High", th:"สูง"}, refDoc:"RFI-2026-008.pdf",
+    description:{en:"Request for Information raised by the Design team: on-site rebar spacing at the Floor 12 transfer beam appears to conflict with the structural drawing. Design is requesting site measurements and photos before confirming whether to proceed as drawn or issue a revised detail.", th:"ผู้ออกแบบขอข้อมูลเพิ่มเติม (RFI) เนื่องจากระยะเหล็กเสริมคานถ่ายน้ำหนักชั้น 12 หน้างานดูไม่ตรงกับแบบโครงสร้าง จึงขอภาพถ่ายและขนาดจริงหน้างานก่อนยืนยันว่าจะดำเนินการตามแบบเดิมหรือออกแบบแก้ไขใหม่"},
+    tasks:[
+      {name:{en:"Site Measurement & Photos", th:"วัดขนาดและถ่ายภาพหน้างาน"}, progress:100},
+      {name:{en:"Consultant Review", th:"ที่ปรึกษาตรวจสอบ"}, progress:60},
+      {name:{en:"Design Clarification", th:"ผู้ออกแบบชี้แจง/ออกแบบแก้ไข"}, progress:0},
+      {name:{en:"Issue Revised Detail (if needed)", th:"ออกแบบรายละเอียดแก้ไข (ถ้าจำเป็น)"}, progress:0},
+      {name:{en:"Distribute to Site", th:"แจกจ่ายให้หน้างาน"}, progress:0},
+    ],
+    scheduleImpact:"+2 Days", scheduleImpactTh:"+2 วัน", costImpact:"TBD",
+    affectedActivities:[{en:"Floor 12 Beam Casting", th:"งานเทคอนกรีตคานชั้น 12"},{en:"Floor 13 Formwork", th:"งานแบบหล่อชั้น 13"}]
+  },
+  {id:"COMMAND-024", subject:{en:"Replace the door in Room A-101", th:"เปลี่ยนประตูห้อง A-101"}, issuer:"role_owner", date:{en:"18 Sep 2026", th:"18 ก.ย. 2569"}, status:"status_inprogress", statusColor:"amber", deadline:{en:"30 Sep 2026", th:"30 ก.ย. 2569"}, area:{en:"Building A / Room A-101", th:"อาคาร A / ห้อง A-101"}, priority:{en:"High", th:"สูง"}, refDoc:"OWR-2026-114.pdf",
+    description:{en:"Replace the existing door in Room A-101 with a fire-rated steel door per updated safety code. Includes opening inspection, procurement, delivery, installation and final sign-off.", th:"เปลี่ยนประตูเดิมของห้อง A-101 เป็นประตูเหล็กกันไฟตามมาตรฐานความปลอดภัยฉบับปรับปรุง รวมถึงการตรวจสอบช่องเปิด จัดหาวัสดุ ขนส่ง ติดตั้ง และตรวจรับงานขั้นสุดท้าย"},
+    tasks:[
+      {name:{en:"Demolition", th:"รื้อประตูเดิม"}, progress:100},
+      {name:{en:"Opening Inspection", th:"ตรวจสอบขนาดช่องเปิด"}, progress:100},
+      {name:{en:"Material Procurement", th:"จัดหาวัสดุ"}, progress:80},
+      {name:{en:"Delivery", th:"ขนส่งวัสดุ"}, progress:60},
+      {name:{en:"Installation", th:"ติดตั้งประตู"}, progress:20},
+      {name:{en:"Finishing", th:"เก็บงาน"}, progress:0},
+      {name:{en:"Inspection", th:"ตรวจสอบและส่งมอบ"}, progress:0},
+    ],
+    scheduleImpact:"+3 Days", scheduleImpactTh:"+3 วัน", costImpact:"+50,000 THB",
+    affectedActivities:[{en:"Door Installation", th:"งานติดตั้งประตู"},{en:"Painting", th:"งานทาสี"},{en:"Final Inspection", th:"การตรวจรับขั้นสุดท้าย"}]
+  },
+  {id:"COMMAND-023", subject:{en:"Re-tile Building B, Floor 1", th:"ปูกระเบื้องใหม่ อาคาร B ชั้น 1"}, issuer:"role_owner", date:{en:"15 Sep 2026", th:"15 ก.ย. 2569"}, status:"status_inprogress", statusColor:"amber", deadline:{en:"28 Sep 2026", th:"28 ก.ย. 2569"}, area:{en:"Building B / Floor 1", th:"อาคาร B / ชั้น 1"}, priority:{en:"Medium", th:"ปานกลาง"}, refDoc:"OWR-2026-109.pdf",
+    description:{en:"Re-tile the ground floor lobby and corridor of Building B using the approved porcelain tile spec.", th:"ปูกระเบื้องพอร์ซเลนใหม่บริเวณล็อบบี้และทางเดินชั้น 1 ของอาคาร B ตามสเปกที่ได้รับอนุมัติ"},
+    tasks:[
+      {name:{en:"Surface Preparation", th:"เตรียมพื้นผิว"}, progress:100},
+      {name:{en:"Material Delivery", th:"ขนส่งวัสดุ"}, progress:100},
+      {name:{en:"Tiling — Lobby", th:"ปูกระเบื้อง — ล็อบบี้"}, progress:70},
+      {name:{en:"Tiling — Corridor", th:"ปูกระเบื้อง — ทางเดิน"}, progress:35},
+      {name:{en:"Grouting", th:"ยาแนว"}, progress:0},
+      {name:{en:"Final Clean", th:"ทำความสะอาดขั้นสุดท้าย"}, progress:0},
+    ],
+    scheduleImpact:"+1 Day", scheduleImpactTh:"+1 วัน", costImpact:"+18,000 THB",
+    affectedActivities:[{en:"Lobby Handover", th:"ส่งมอบล็อบบี้"},{en:"Furniture Move-in", th:"ขนย้ายเฟอร์นิเจอร์"}]
+  },
+  {id:"COMMAND-022", subject:{en:"Install MDB Room Electrical System", th:"ติดตั้งระบบไฟฟ้าห้อง MDB"}, issuer:"role_owner", date:{en:"10 Sep 2026", th:"10 ก.ย. 2569"}, status:"status_completed", statusColor:"green", deadline:{en:"20 Sep 2026", th:"20 ก.ย. 2569"}, area:{en:"Building A / MDB Room", th:"อาคาร A / ห้อง MDB"}, priority:{en:"High", th:"สูง"}, refDoc:"OWR-2026-101.pdf",
+    description:{en:"Install and commission the main distribution board electrical system per revised load schedule.", th:"ติดตั้งและทดสอบระบบไฟฟ้าตู้จ่ายไฟหลักตามตารางโหลดที่ปรับปรุงใหม่"},
+    tasks:[
+      {name:{en:"Panel Delivery", th:"ขนส่งตู้ไฟ"}, progress:100},
+      {name:{en:"Wiring", th:"เดินสายไฟ"}, progress:100},
+      {name:{en:"Installation", th:"ติดตั้ง"}, progress:100},
+      {name:{en:"Testing & Commissioning", th:"ทดสอบและตรวจรับระบบ"}, progress:100},
+    ],
+    scheduleImpact:"On Time", scheduleImpactTh:"ตรงตามแผน", costImpact:"0 THB",
+    affectedActivities:[{en:"Power-on Testing", th:"การทดสอบจ่ายไฟ"}]
+  },
+  {id:"COMMAND-021", subject:{en:"Repaint Floor 3 Corridor", th:"ทาสีทางเดินชั้น 3"}, issuer:"role_owner", date:{en:"8 Sep 2026", th:"8 ก.ย. 2569"}, status:"status_delayed", statusColor:"red", deadline:{en:"22 Sep 2026", th:"22 ก.ย. 2569"}, area:{en:"Building A / Floor 3 Corridor", th:"อาคาร A / ทางเดินชั้น 3"}, priority:{en:"Medium", th:"ปานกลาง"}, refDoc:"OWR-2026-098.pdf",
+    description:{en:"Repaint the 3rd floor corridor walls and ceiling using the specified low-VOC paint system.", th:"ทาสีผนังและฝ้าเพดานทางเดินชั้น 3 ใหม่ด้วยระบบสี low-VOC ตามที่กำหนด"},
+    tasks:[
+      {name:{en:"Surface Prep", th:"เตรียมพื้นผิว"}, progress:100},
+      {name:{en:"Primer Coat", th:"ทารองพื้น"}, progress:60},
+      {name:{en:"Finish Coat", th:"ทาสีจริง"}, progress:0},
+      {name:{en:"Inspection", th:"ตรวจสอบ"}, progress:0},
+    ],
+    scheduleImpact:"+4 Days", scheduleImpactTh:"+4 วัน", costImpact:"+6,000 THB",
+    affectedActivities:[{en:"Floor 3 Handover", th:"ส่งมอบชั้น 3"}]
+  },
+];
+
+const TODAY = [
+  {task:{en:"Door Installation — Building A, A-101", th:"งานติดตั้งประตู — อาคาร A, A-101"}, contractor:"Siam Construct Co.", progress:20, status:"status_ontrack", statusColor:"blue", evidence:{en:"3 photos", th:"3 รูปภาพ"}, updated:{en:"2h ago", th:"2 ชม.ที่แล้ว"}},
+  {task:{en:"Tiling — Building B, Floor 1 Lobby", th:"งานปูกระเบื้อง — อาคาร B ล็อบบี้ชั้น 1"}, contractor:"Siam Construct Co.", progress:70, status:"status_ahead", statusColor:"green", evidence:{en:"5 photos", th:"5 รูปภาพ"}, updated:{en:"45m ago", th:"45 นาทีที่แล้ว"}},
+  {task:{en:"Electrical — MDB Room Testing", th:"งานระบบไฟฟ้า — ทดสอบห้อง MDB"}, contractor:"Volt Systems Ltd.", progress:100, status:"status_completed", statusColor:"green", evidence:{en:"2 photos, 1 report", th:"2 รูปภาพ, 1 รายงาน"}, updated:{en:"1d ago", th:"1 วันที่แล้ว"}},
+  {task:{en:"Painting — Floor 3 Corridor", th:"งานทาสี — ทางเดินชั้น 3"}, contractor:"Siam Construct Co.", progress:60, status:"status_delayed", statusColor:"red", evidence:{en:"1 photo", th:"1 รูปภาพ"}, updated:{en:"5h ago", th:"5 ชม.ที่แล้ว"}},
+];
+
+const VERIFICATIONS = [
+  {task:{en:"Door Installation — A-101", th:"งานติดตั้งประตู — A-101"}, location:{en:"Building A / Room A-101", th:"อาคาร A / ห้อง A-101"}, reported:100, ai:55, evidence:5, flag:true},
+  {task:{en:"Tiling — Lobby", th:"งานปูกระเบื้อง — ล็อบบี้"}, location:{en:"Building B / Floor 1", th:"อาคาร B / ชั้น 1"}, reported:70, ai:68, evidence:4, flag:false},
+  {task:{en:"Painting Primer Coat", th:"งานทารองพื้นสี"}, location:{en:"Building A / Floor 3", th:"อาคาร A / ชั้น 3"}, reported:60, ai:38, evidence:2, flag:true},
+];
+
+const ACTIONS = [
+  {level:"crit", text:{en:"Door material delivery is delayed by 3 days", th:"การขนส่งวัสดุประตูล่าช้า 3 วัน"}, responsible:"role_contractor", deadline:{en:"24 Sep 2026", th:"24 ก.ย. 2569"}, cmd:"COMMAND-024"},
+  {level:"crit", text:{en:"Painting progress reported without site evidence", th:"รายงานความคืบหน้างานทาสีโดยไม่มีหลักฐานหน้างาน"}, responsible:"role_contractor", deadline:{en:"23 Sep 2026", th:"23 ก.ย. 2569"}, cmd:"COMMAND-021"},
+  {level:"crit", text:{en:"Progress discrepancy exceeds 12% threshold", th:"ความคลาดเคลื่อนความคืบหน้าเกินเกณฑ์ 12%"}, responsible:"role_consultant", deadline:{en:"23 Sep 2026", th:"23 ก.ย. 2569"}, cmd:"COMMAND-024"},
+  {level:"att", text:{en:"Consultant verification pending on 12 tasks", th:"รองานตรวจสอบจากที่ปรึกษาอีก 12 งาน"}, responsible:"role_consultant", deadline:{en:"23 Sep 2026", th:"23 ก.ย. 2569"}, cmd:{en:"Multiple", th:"หลายรายการ"}},
+  {level:"att", text:{en:"Inspection request awaiting scheduling", th:"คำขอตรวจสอบรอการนัดหมาย"}, responsible:"role_consultant", deadline:{en:"25 Sep 2026", th:"25 ก.ย. 2569"}, cmd:"COMMAND-023"},
+  {level:"att", text:{en:"Designer RFI on Floor 12 beam reinforcement needs a consultant response", th:"RFI จากผู้ออกแบบเรื่องเหล็กเสริมคานชั้น 12 รอการตอบกลับจากที่ปรึกษา"}, responsible:"role_consultant", deadline:{en:"27 Sep 2026", th:"27 ก.ย. 2569"}, cmd:"COMMAND-025"},
+  {level:"fyi", text:{en:"Owner approval required for revised tile spec", th:"ต้องขออนุมัติเจ้าของโครงการสำหรับสเปกกระเบื้องที่ปรับปรุงใหม่"}, responsible:"role_owner", deadline:{en:"25 Sep 2026", th:"25 ก.ย. 2569"}, cmd:"COMMAND-023"},
+];
+
+const INSIGHTS = [
+  {type:{en:"Potential Delay", th:"ความล่าช้าที่อาจเกิดขึ้น"}, title:{en:"Material delivery for Building A is 3 days behind planned date.", th:"การขนส่งวัสดุสำหรับอาคาร A ล่าช้ากว่าแผน 3 วัน"}, impact:{en:"Door Installation", th:"งานติดตั้งประตู"}, scheduleImpact:{en:"+3 Days", th:"+3 วัน"}, color:"amber", icon:"calendar"},
+  {type:{en:"Progress Discrepancy", th:"ความคลาดเคลื่อนของความคืบหน้า"}, title:{en:"Contractor reported 86%, consultant verified 74%.", th:"ผู้รับเหมารายงาน 86% แต่ที่ปรึกษายืนยันได้ 74%"}, impact:{en:"Overall Project Progress", th:"ความคืบหน้ารวมของโครงการ"}, scheduleImpact:{en:"12% Difference", th:"ต่างกัน 12%"}, color:"red", icon:"trend", action:true},
+  {type:{en:"Dependency Risk", th:"ความเสี่ยงจากงานที่ต่อเนื่องกัน"}, title:{en:"Painting activity depends on completion of door installation.", th:"งานทาสีขึ้นอยู่กับความสำเร็จของงานติดตั้งประตู"}, impact:{en:"Floor 3 Corridor Schedule", th:"แผนงานทางเดินชั้น 3"}, scheduleImpact:{en:"Medium Risk", th:"ความเสี่ยงปานกลาง"}, color:"blue", icon:"layers"},
+  {type:{en:"Data Anomaly Detected", th:"ตรวจพบความผิดปกติของข้อมูล"}, title:{en:"Visual evidence for Door Installation appears inconsistent with the reported 100% completion.", th:"หลักฐานภาพของงานติดตั้งประตูดูไม่สอดคล้องกับความคืบหน้าที่รายงานว่าเสร็จ 100%"}, impact:{en:"COMMAND-024", th:"COMMAND-024"}, scheduleImpact:{en:"Requires Review", th:"ต้องตรวจสอบ"}, color:"red", icon:"spark"},
+];
+
+const DOC_CATS = [
+  {key:"owner_commands", label:{en:"Owner Commands", th:"คำสั่งงานจากเจ้าของโครงการ"}, docs:[{name:"OWR-2026-114.pdf", meta:{en:"Linked to COMMAND-024 · 1.2 MB", th:"เชื่อมโยงกับ COMMAND-024 · 1.2 MB"}, cmd:true},{name:"OWR-2026-109.pdf", meta:{en:"Linked to COMMAND-023 · 0.9 MB", th:"เชื่อมโยงกับ COMMAND-023 · 0.9 MB"}, cmd:true}]},
+  {key:"design_rfis", label:{en:"Design RFIs", th:"เอกสารขอข้อมูลจากผู้ออกแบบ (RFI)"}, docs:[{name:"RFI-2026-008.pdf", meta:{en:"Linked to COMMAND-025 · Raised by Designer · 0.6 MB", th:"เชื่อมโยงกับ COMMAND-025 · ยื่นโดยผู้ออกแบบ · 0.6 MB"}, cmd:true}]},
+  {key:"contract_documents", label:{en:"Contract Documents", th:"เอกสารสัญญา"}, docs:[{name:"Main Contract Agreement.pdf", meta:{en:"Signed 12 Jan 2026 · 4.1 MB", th:"ลงนาม 12 ม.ค. 2569 · 4.1 MB"}}]},
+  {key:"drawings", label:{en:"Drawings", th:"แบบก่อสร้าง"}, docs:[{name:"A-101 Door Detail Rev.C.dwg", meta:{en:"Updated 16 Sep 2026 · 2.3 MB", th:"อัปเดต 16 ก.ย. 2569 · 2.3 MB"}},{name:"Building B Floor 1 Plan.pdf", meta:{en:"Updated 2 Sep 2026 · 3.8 MB", th:"อัปเดต 2 ก.ย. 2569 · 3.8 MB"}}]},
+  {key:"boq", label:{en:"BOQ", th:"ใบแสดงปริมาณงาน (BOQ)"}, docs:[{name:"Bill of Quantities — Rev.4.xlsx", meta:{en:"Updated 20 Aug 2026 · 610 KB", th:"อัปเดต 20 ส.ค. 2569 · 610 KB"}}]},
+  {key:"schedule_docs", label:{en:"Schedule", th:"ตารางแผนงาน"}, docs:[{name:"Master Schedule — Baseline.mpp", meta:{en:"Baseline · 220 KB", th:"แผนหลัก · 220 KB"}},{name:"Master Schedule — Current.mpp", meta:{en:"Updated 21 Sep 2026 · 224 KB", th:"อัปเดต 21 ก.ย. 2569 · 224 KB"}}]},
+  {key:"daily_reports", label:{en:"Daily Reports", th:"รายงานประจำวัน"}, docs:[{name:"Daily Report — 21 Sep 2026.pdf", meta:{en:"Submitted by Contractor · 340 KB", th:"ส่งโดยผู้รับเหมา · 340 KB"}}]},
+  {key:"inspection_reports", label:{en:"Inspection Reports", th:"รายงานการตรวจสอบ"}, docs:[{name:"MDB Room Inspection.pdf", meta:{en:"Passed · 12 Sep 2026", th:"ผ่านการตรวจสอบ · 12 ก.ย. 2569"}}]},
+  {key:"meeting_minutes", label:{en:"Meeting Minutes", th:"รายงานการประชุม"}, docs:[{name:"Site Meeting Minutes #18.pdf", meta:{en:"18 Sep 2026 · Owner, Consultant, Contractor", th:"18 ก.ย. 2569 · เจ้าของโครงการ ที่ปรึกษา ผู้รับเหมา"}}]},
+];
+
+const NOTIFS = [
+  {level:"blue", text:{en:"Designer raised an RFI on Floor 12 beam reinforcement (COMMAND-025).", th:"ผู้ออกแบบยื่น RFI เรื่องเหล็กเสริมคานชั้น 12 (COMMAND-025)"}, time:{en:"8 min ago", th:"8 นาทีที่แล้ว"}},
+  {level:"red", text:{en:"Critical issue detected: Painting progress reported without evidence.", th:"ตรวจพบปัญหาวิกฤต: รายงานความคืบหน้างานทาสีโดยไม่มีหลักฐาน"}, time:{en:"12 min ago", th:"12 นาทีที่แล้ว"}},
+  {level:"amber", text:{en:"Consultant verification required for Door Installation, A-101.", th:"ต้องการการตรวจสอบจากที่ปรึกษาสำหรับงานติดตั้งประตู A-101"}, time:{en:"40 min ago", th:"40 นาทีที่แล้ว"}},
+  {level:"blue", text:{en:"New Owner command issued: COMMAND-024.", th:"มีคำสั่งงานใหม่จากเจ้าของโครงการ: COMMAND-024"}, time:{en:"2h ago", th:"2 ชม.ที่แล้ว"}},
+  {level:"blue", text:{en:"Contractor submitted 5 new evidence photos for Lobby Tiling.", th:"ผู้รับเหมาส่งรูปภาพหลักฐานใหม่ 5 รูปสำหรับงานปูกระเบื้องล็อบบี้"}, time:{en:"3h ago", th:"3 ชม.ที่แล้ว"}},
+];
+
+const CONFLICTS = [
+  {task:{en:"Door Installation — A-101", th:"งานติดตั้งประตู — A-101"}, cmd:"COMMAND-024", contractor:86, consultant:74, daily:90, ai:55},
+];
+
+// "Waiting on You" — role-specific queue of items blocked on that role, with age (days) driving urgency color
+const WAITING_ON_YOU = {
+  owner:[
+    {text:{en:"Approve estimated cost impact for RFI-008 (Floor 12 beam reinforcement)", th:"อนุมัติผลกระทบด้านงบประมาณของ RFI-008 (เหล็กเสริมคานชั้น 12)"}, days:4, cmd:"COMMAND-025"},
+    {text:{en:"Approve revised tile spec so Building B lobby can proceed", th:"อนุมัติสเปกกระเบื้องที่แก้ไขใหม่ เพื่อให้งานล็อบบี้อาคาร B ดำเนินการต่อได้"}, days:2, cmd:"COMMAND-023"},
+  ],
+  consultant:[
+    {text:{en:"12 contractor progress reports pending your verification", th:"รายงานความคืบหน้าจากผู้รับเหมา 12 รายการรอการตรวจสอบจากคุณ"}, days:3, go:"verification"},
+    {text:{en:"Respond to Designer's RFI on Floor 12 beam reinforcement", th:"ตอบกลับ RFI จากผู้ออกแบบเรื่องเหล็กเสริมคานชั้น 12"}, days:2, cmd:"COMMAND-025"},
+    {text:{en:"3 critical issues are undecided and blocking site work", th:"ปัญหาวิกฤต 3 รายการยังไม่ได้ตัดสินใจและบล็อกงานหน้างานอยู่"}, days:5, go:"actions"},
+  ],
+  contractor:[
+    {text:{en:"Floor 3 corridor painting is overdue against the schedule", th:"งานทาสีทางเดินชั้น 3 ล่าช้ากว่าแผนงาน"}, days:4, cmd:"COMMAND-021"},
+    {text:{en:"Progress report was rejected — revision required on Primer Coat", th:"รายงานความคืบหน้าถูกปฏิเสธ — ต้องแก้ไขงานทารองพื้นสี"}, days:1, go:"verification"},
+    {text:{en:"Missing site evidence photos for reported door installation progress", th:"ยังไม่ได้อัปโหลดรูปหลักฐานสำหรับความคืบหน้างานติดตั้งประตูที่รายงานไว้"}, days:2, go:"evidence"},
+  ],
+  designer:[
+    {text:{en:"Consultant sent a follow-up question on RFI-008 — awaiting your response", th:"ที่ปรึกษาส่งคำถามเพิ่มเติมเกี่ยวกับ RFI-008 — รอคำตอบจากคุณ"}, days:1, cmd:"COMMAND-025"},
+    {text:{en:"Site reports the door frame at A-101 doesn't match the drawing — needs your clarification", th:"หน้างานแจ้งว่าวงกบประตู A-101 ไม่ตรงกับแบบ — ต้องการคำชี้แจงจากคุณ"}, days:3, cmd:"COMMAND-024"},
+  ],
+};
+
+/* ============================= HELPERS ============================= */
+
+function el(html){ const tpl=document.createElement("template"); tpl.innerHTML=html.trim(); return tpl.content.firstChild; }
+function icon(name, extraAttrs=""){ return `<svg viewBox="0 0 24 24" fill="none" ${extraAttrs}>${ICONS[name]||""}</svg>`; }
+function barColor(pct){ if(pct>=90) return "var(--green)"; if(pct>=60) return "var(--blue)"; if(pct>=30) return "var(--amber)"; return "var(--red)"; }
+function statusBadge(key, color){ return `<span class="badge badge-${color}"><span class="dot"></span>${t(key)}</span>`; }
+function statusBadgeText(text, color){ return `<span class="badge badge-${color}"><span class="dot"></span>${text}</span>`; }
+function zoneStart(labelKey, colorVar){
+  const zoneEl = el(`
+    <div class="zone-box" style="--zone-color:${colorVar}">
+      <div class="zone-head"><span class="zone-dot"></span><span class="zone-title">${t(labelKey)}</span></div>
+      <div class="zone-body"></div>
+    </div>
+  `);
+  return {el:zoneEl, body:zoneEl.querySelector(".zone-body")};
+}
+
+/* ---------- S-Curve chart (SVG) ---------- */
+// Cumulative % by week — classic S-curve shape (slow start, steep middle, tapering finish)
+const SCURVE_WEEKS = 12;
+const SCURVE_PLANNED   = [2,6,13,24,38,52,65,76,85,92,97,100];
+const SCURVE_CONTRACTOR= [2,7,15,27,41,55,68,79,86,90,null,null];
+const SCURVE_VERIFIED  = [1,5,11,21,33,45,57,66,74,null,null,null];
+
+function buildSCurvePath(values, w, h, padL, padT, innerW, innerH){
+  const pts = [];
+  values.forEach((v,i)=>{
+    if(v==null) return;
+    pts.push([padL + (i/(SCURVE_WEEKS-1))*innerW, padT + innerH - (v/100)*innerH]);
+  });
+  if(pts.length===0) return {d:"", last:null};
+  if(pts.length===1) return {d:`M ${pts[0][0]} ${pts[0][1]}`, last:pts[0]};
+  // monotone cubic (Fritsch-Carlson) => smooth S shape without wiggles
+  const n = pts.length, dx=[], m=[], tan=new Array(n);
+  for(let i=0;i<n-1;i++){ dx[i]=pts[i+1][0]-pts[i][0]; m[i]=(pts[i+1][1]-pts[i][1])/dx[i]; }
+  tan[0]=m[0]; tan[n-1]=m[n-2];
+  for(let i=1;i<n-1;i++){ tan[i] = (m[i-1]*m[i] <= 0) ? 0 : (m[i-1]+m[i])/2; }
+  for(let i=0;i<n-1;i++){
+    if(m[i]===0){ tan[i]=0; tan[i+1]=0; continue; }
+    const a=tan[i]/m[i], b=tan[i+1]/m[i], sq=a*a+b*b;
+    if(sq>9){ const k=3/Math.sqrt(sq); tan[i]=k*a*m[i]; tan[i+1]=k*b*m[i]; }
+  }
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for(let i=0;i<n-1;i++){
+    const h3 = dx[i]/3;
+    d += ` C ${pts[i][0]+h3} ${pts[i][1]+tan[i]*h3}, ${pts[i+1][0]-h3} ${pts[i+1][1]-tan[i+1]*h3}, ${pts[i+1][0]} ${pts[i+1][1]}`;
+  }
+  return {d, last:pts[n-1]};
+}
+
+function renderSCurveSVG(){
+  const w=640, h=280, padL=46, padT=14, padB=34, padR=16;
+  const innerW = w-padL-padR, innerH = h-padT-padB;
+  const planned = buildSCurvePath(SCURVE_PLANNED, w,h,padL,padT,innerW,innerH);
+  const contractor = buildSCurvePath(SCURVE_CONTRACTOR, w,h,padL,padT,innerW,innerH);
+  const verified = buildSCurvePath(SCURVE_VERIFIED, w,h,padL,padT,innerW,innerH);
+
+  let gridLines = "";
+  [0,25,50,75,100].forEach(v=>{
+    const y = padT + innerH - (v/100)*innerH;
+    gridLines += `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+    gridLines += `<text x="${padL-8}" y="${y+3}" font-size="13" fill="var(--ink-3)" text-anchor="end" font-family="Inter">${v}%</text>`;
+  });
+  let weekLabels = "";
+  for(let i=0;i<SCURVE_WEEKS;i+=2){
+    const x = padL + (i/(SCURVE_WEEKS-1))*innerW;
+    weekLabels += `<text x="${x}" y="${h-10}" font-size="13" fill="var(--ink-3)" text-anchor="middle" font-family="Inter">${(currentLang==='th'?'สัปดาห์':'Wk')} ${i+1}</text>`;
+  }
+  function dot(pt,color){ return pt? `<circle cx="${pt[0]}" cy="${pt[1]}" r="4" fill="${color}" stroke="var(--surface)" stroke-width="1.5"/>` : ""; }
+
+  return `
+  <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block">
+    ${gridLines}
+    ${weekLabels}
+    <path d="${planned.d}" fill="none" stroke="var(--ink-3)" stroke-width="2" stroke-dasharray="5,4"/>
+    <path d="${verified.d}" fill="none" stroke="var(--green)" stroke-width="2.5"/>
+    <path d="${contractor.d}" fill="none" stroke="var(--blue)" stroke-width="2.5"/>
+    ${dot(planned.last,'var(--ink-3)')}
+    ${dot(verified.last,'var(--green)')}
+    ${dot(contractor.last,'var(--blue)')}
+  </svg>`;
+}
+function scurveLegend(){
+  return `
+  <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:10px">
+    <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)"><span style="width:16px;height:2px;background:var(--ink-3);display:inline-block;border-top:2px dashed var(--ink-3)"></span>${t('scurve_planned')}</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)"><span style="width:16px;height:2.5px;background:var(--blue);display:inline-block"></span>${t('scurve_contractor')}</div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-2)"><span style="width:16px;height:2.5px;background:var(--green);display:inline-block"></span>${t('scurve_verified')}</div>
+  </div>`;
+}
+
+/* ---------- 3D Progress Model (isometric-style SVG building) ---------- */
+const D3_FLOORS = 6;
+// stage numbering: 0=nothing, 1=foundation, then per floor i (1..6): struct=2+3*(i-1), wallActive=struct+1, wallDone=struct+2, then roof=last+1
+function d3StageNums(i){ const struct=2+3*(i-1); return {struct, wallActive:struct+1, wallDone:struct+2}; }
+const D3_MAX_STAGE = d3StageNums(D3_FLOORS).wallDone + 1; // + roof
+
+function d3FloorState(floorIdx, N){
+  const {struct, wallActive, wallDone} = d3StageNums(floorIdx);
+  if(N < struct) return {structure:'pending', wall:'pending'};
+  if(N === struct) return {structure:'done', wall:'pending'};
+  if(N === wallActive) return {structure:'done', wall:'active'};
+  return {structure:'done', wall:'done'}; // N >= wallDone
+}
+function d3CurrentLabel(N){
+  if(N<=0) return t('d3_stage_site');
+  if(N===1) return t('d3_stage_foundation');
+  if(N===D3_MAX_STAGE) return t('d3_stage_roof');
+  for(let i=1;i<=D3_FLOORS;i++){
+    const {struct, wallActive, wallDone} = d3StageNums(i);
+    if(N===struct) return `${t('d3_stage_structure')} — ${t('d3_floor')} ${i}`;
+    if(N===wallActive) return `${t('d3_stage_wall_active')} — ${t('d3_floor')} ${i}`;
+    if(N===wallDone) return `${t('d3_stage_wall_done')} — ${t('d3_floor')} ${i}`;
+  }
+  return "";
+}
+function d3Colors(){
+  return { done:"#9AA6AD", doneWall:"#E7E2D8", active:"#C1402F", pendingStroke:"#CBD0D8" };
+}
+function renderBuildingSVG(N, compact){
+  const C = d3Colors();
+  const floorH = compact? 22 : 34, floorGap = compact? 3 : 5, floorW = compact? 130 : 200;
+  const colW = compact? 6 : 10;
+  const baseX = 40, topPad = compact? 10 : 16;
+  const roofH = compact? 12 : 18, foundH = compact? 10 : 16;
+  const totalH = topPad + roofH + D3_FLOORS*(floorH+floorGap) + foundH + 20;
+  const svgW = floorW + baseX*2;
+
+  let y = topPad + roofH;
+  let floorsSVG = "";
+  // draw top floor first visually (floor 6 at top), so loop from D3_FLOORS down to 1
+  for(let i=D3_FLOORS;i>=1;i--){
+    const st = d3FloorState(i, N);
+    const wallFill = st.wall==='pending' ? 'transparent' : st.wall==='active' ? C.active : C.doneWall;
+    const wallStroke = st.wall==='pending' ? C.pendingStroke : 'none';
+    const structFill = st.structure==='pending' ? 'transparent' : C.done;
+    const structStroke = st.structure==='pending' ? C.pendingStroke : 'none';
+    const fx = baseX;
+    floorsSVG += `
+      <g>
+        <rect x="${fx}" y="${y}" width="${floorW}" height="${floorH}" fill="${wallFill}" stroke="${wallStroke}" stroke-width="1" stroke-dasharray="${st.wall==='pending'?'3,3':'0'}"/>
+        <rect x="${fx}" y="${y}" width="${colW}" height="${floorH}" fill="${structFill}" stroke="${structStroke}" stroke-dasharray="${st.structure==='pending'?'3,3':'0'}"/>
+        <rect x="${fx+floorW-colW}" y="${y}" width="${colW}" height="${floorH}" fill="${structFill}" stroke="${structStroke}" stroke-dasharray="${st.structure==='pending'?'3,3':'0'}"/>
+        <rect x="${fx}" y="${y+floorH-4}" width="${floorW}" height="4" fill="${structFill}" stroke="${structStroke}"/>
+        ${!compact?`<text x="${fx-8}" y="${y+floorH/2+3}" font-size="9" fill="var(--ink-3)" text-anchor="end" font-family="Inter">${i}</text>`:""}
+      </g>`;
+    y += floorH + floorGap;
+  }
+  const roofDone = N >= D3_MAX_STAGE;
+  const roofY = topPad;
+  const roofFill = roofDone ? C.done : 'transparent';
+  const roofStroke = roofDone ? 'none' : C.pendingStroke;
+  const foundFill = N>=1 ? C.done : 'transparent';
+  const foundStroke = N>=1 ? 'none' : C.pendingStroke;
+
+  return `
+  <div style="display:flex;justify-content:center;overflow:hidden;width:100%">
+    <div style="width:100%;transform:perspective(900px) rotateX(6deg) rotateY(-12deg);transform-style:preserve-3d">
+      <svg viewBox="0 0 ${svgW} ${totalH}" style="width:100%;max-width:${compact?220:340}px;height:auto;display:block;margin:0 auto">
+        <polygon points="${baseX-10},${roofY} ${baseX+floorW/2},${roofY-roofH} ${baseX+floorW+10},${roofY}" fill="${roofFill}" stroke="${roofStroke}" stroke-dasharray="${roofDone?'0':'3,3'}"/>
+        ${floorsSVG}
+        <rect x="${baseX-6}" y="${y}" width="${floorW+12}" height="${foundH}" fill="${foundFill}" stroke="${foundStroke}" stroke-dasharray="${N>=1?'0':'3,3'}"/>
+      </svg>
+    </div>
+  </div>`;
+}
+
+/* ============================= NAV / SHELL ============================= */
+
+let activeView = "dashboard";
+let activeParam = null;
+
+const GROUP_COLORS = {
+  ng_overview:"#5A8CA6",
+  ng_commands:"#2C6CA6",
+  ng_progress:"#1E8A5F",
+  ng_evidence:"#C1402F",
+  ng_reference:"#868C99",
+};
+
+function renderNav(){
+  const wrap = document.getElementById("navList");
+  wrap.innerHTML = "";
+  let groupColor = GROUP_COLORS.ng_overview;
+  NAV.forEach(item=>{
+    if(item.group){
+      groupColor = GROUP_COLORS[item.group] || "var(--brand)";
+      wrap.appendChild(el(`<div class="nav-group-label"><span class="ng-dot" style="background:${groupColor}"></span>${t(item.group)}</div>`));
+      return;
+    }
+    const btn = el(`
+      <button class="nav-item ${activeView===item.id?'active':''}" data-view="${item.id}" style="--item-accent:${groupColor}">
+        ${icon(item.icon)}
+        <span>${t(item.labelKey)}</span>
+        ${item.count?`<span class="count">${item.count}</span>`:""}
+      </button>
+    `);
+    btn.onclick = ()=>navigate(item.id);
+    wrap.appendChild(btn);
+  });
+}
+
+function navigate(id, param){
+  activeView = id;
+  activeParam = param;
+  renderNav();
+  toggleSidebar(false);
+  closeAllPanels();
+  window.scrollTo({top:0,behavior:"instant"});
+  const view = document.getElementById("view");
+  view.innerHTML = "";
+  const renderer = VIEWS[id] || VIEWS.dashboard;
+  view.appendChild(renderer(param));
+}
+
+function toggleSidebar(open){
+  document.getElementById("sidebar").classList.toggle("open", open);
+  document.getElementById("scrim").classList.toggle("open", open);
+}
+
+function closeAllPanels(){
+  document.getElementById("panel-role").classList.remove("open");
+  document.getElementById("panel-notif").classList.remove("open");
+  document.getElementById("searchResults").classList.remove("open");
+}
+function togglePanel(name){
+  const isOpen = document.getElementById("panel-"+name).classList.contains("open");
+  closeAllPanels();
+  if(!isOpen) document.getElementById("panel-"+name).classList.add("open");
+}
+document.addEventListener("click", (e)=>{
+  if(!e.target.closest(".role-switch") && !e.target.closest(".icon-btn")) {
+    document.getElementById("panel-role").classList.remove("open");
+    document.getElementById("panel-notif").classList.remove("open");
+  }
+  if(!e.target.closest(".search")) document.getElementById("searchResults").classList.remove("open");
+});
+
+function renderRoleMenu(){
+  const wrap = document.getElementById("panel-role");
+  wrap.innerHTML = "";
+  if(currentUser){
+    wrap.appendChild(el(`
+      <div class="profile-header">
+        <div class="pname">${currentUser.name}</div>
+        <div class="pemail">${currentUser.email}</div>
+      </div>
+    `));
+    wrap.appendChild(el(`<div class="role-menu-label">${t('previewAs')}</div>`));
+  }
+  Object.entries(ROLES).forEach(([key,r])=>{
+    const opt = el(`
+      <button class="role-opt ${currentRole===key?'sel':''}">
+        <span class="role-avatar">${r.short[currentLang]||r.short.en}</span> ${t(r.labelKey)}
+      </button>
+    `);
+    opt.onclick = ()=>{ currentRole=key; updateRoleUI(); togglePanel('role'); navigate(activeView, activeParam); };
+    wrap.appendChild(opt);
+  });
+  if(currentUser){
+    const signOutBtn = el(`<button class="role-opt signout-opt" style="margin-top:4px;border-top:1px solid var(--border);border-radius:0;padding-top:10px">${t('signOut')}</button>`);
+    signOutBtn.onclick = ()=>{ togglePanel('role'); doSignOut(); };
+    wrap.appendChild(signOutBtn);
+  }
+}
+function updateRoleUI(){
+  document.getElementById("roleBtnLabel").innerHTML = currentUser
+    ? `<b>${currentUser.name.split(' ')[0]}</b> · ${t(ROLES[currentRole].labelKey)}`
+    : `${t("viewingAs")} <b>${t(ROLES[currentRole].labelKey)}</b>`;
+  document.getElementById("roleAvatar").textContent = ROLES[currentRole].short[currentLang]||ROLES[currentRole].short.en;
+}
+
+/* ---------- Login / account ---------- */
+function showChooser(){
+  document.getElementById("loginBody").style.display = "none";
+  document.getElementById("chooserBody").style.display = "block";
+  const list = document.getElementById("chooserList");
+  list.innerHTML = "";
+  DEMO_ACCOUNTS.forEach(acc=>{
+    const initials = acc.name.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const item = el(`
+      <button class="chooser-item">
+        <span class="chooser-avatar" style="background:${acc.color}">${initials}</span>
+        <span>
+          <div class="chooser-name">${acc.name}</div>
+          <div class="chooser-email">${acc.email} · ${t(ROLES[acc.role].labelKey)}</div>
+        </span>
+      </button>
+    `);
+    item.onclick = ()=> doSignIn({name:acc.name, email:acc.email, role:acc.role});
+    list.appendChild(item);
+  });
+}
+function backToLoginBody(){
+  document.getElementById("chooserBody").style.display = "none";
+  document.getElementById("loginBody").style.display = "block";
+}
+function doSignIn(user){
+  currentUser = {name:user.name, email:user.email};
+  currentRole = user.role;
+  document.getElementById("loginScreen").style.display = "none";
+  document.getElementById("appRoot").style.display = "grid";
+  startApp();
+}
+function doSignOut(){
+  currentUser = null;
+  document.getElementById("appRoot").style.display = "none";
+  document.getElementById("loginScreen").style.display = "flex";
+  backToLoginBody();
+  document.getElementById("loginName").value = "";
+  document.getElementById("loginEmail").value = "";
+}
+function wireLoginScreen(){
+  applyLoginLang();
+  document.getElementById("googleBtn").onclick = showChooser;
+  document.getElementById("chooserBack").onclick = backToLoginBody;
+  document.getElementById("emailSignInBtn").onclick = ()=>{
+    const name = document.getElementById("loginName").value.trim();
+    const email = document.getElementById("loginEmail").value.trim();
+    const role = document.getElementById("loginRole").value;
+    if(!name || !email){
+      document.getElementById("loginName").style.borderColor = name? "":"var(--red)";
+      document.getElementById("loginEmail").style.borderColor = email? "":"var(--red)";
+      return;
+    }
+    doSignIn({name, email, role});
+  };
+}
+function applyLoginLang(){
+  document.getElementById("loginTagline").textContent = t("loginTagline");
+  document.getElementById("googleBtnLabel").textContent = t("continueGoogle");
+  document.getElementById("loginOrLabel").textContent = t("orLabel");
+  document.getElementById("lblName").textContent = t("lblName");
+  document.getElementById("lblEmail").textContent = t("lblEmail");
+  document.getElementById("lblRole").textContent = t("lblRole");
+  document.getElementById("emailSignInBtn").textContent = t("signIn");
+  document.getElementById("loginNote").textContent = t("loginNote");
+  document.getElementById("chooserTitle").textContent = t("chooseAccount");
+  document.getElementById("chooserBack").innerHTML = `← ${t("backWord")}`;
+  const roleSelect = document.getElementById("loginRole");
+  Array.from(roleSelect.options).forEach(opt=>{ opt.textContent = t(ROLES[opt.value].labelKey); });
+}
+
+/* ---------- Waiting on You ---------- */
+function renderWaitingOnYou(){
+  const items = WAITING_ON_YOU[currentRole] || [];
+  const subKey = {owner:"waiting_sub_owner", consultant:"waiting_sub_consultant", contractor:"waiting_sub_contractor", designer:"waiting_sub_designer"}[currentRole];
+  const card = el(`
+    <div class="queue-card">
+      <div class="queue-head">${icon('alert','width="18" height="18" style="color:var(--brand-ink)"')}<span class="qtitle">${t('waiting_title')}</span></div>
+      <div class="queue-sub">${t(subKey)}</div>
+      <div id="queueList"></div>
+    </div>
+  `);
+  const list = card.querySelector("#queueList");
+  if(items.length===0){
+    list.appendChild(el(`<div class="queue-empty">${t('waiting_empty')}</div>`));
+  } else {
+    items.slice().sort((a,b)=>b.days-a.days).forEach(item=>{
+      const ageCls = item.days>=3 ? 'age-red' : 'age-amber';
+      const row = el(`
+        <div class="queue-item">
+          <div class="qtext">${pick(item.text)}</div>
+          <span class="age-pill ${ageCls}">${item.days} ${t('days_overdue')}</span>
+        </div>
+      `);
+      row.onclick = ()=>{
+        if(item.cmd) navigate('commandDetail', item.cmd);
+        else if(item.go) navigate(item.go);
+      };
+      list.appendChild(row);
+    });
+  }
+  return card;
+}
+
+function renderNotifs(){
+  document.getElementById("notifHead").textContent = t("notifications");
+  const wrap = document.getElementById("notifList");
+  wrap.innerHTML = "";
+  const colorMap = {red:"var(--red)", amber:"var(--amber)", blue:"var(--blue)"};
+  NOTIFS.forEach(n=>{
+    const item = el(`
+      <button class="notif-item">
+        <span class="notif-dot" style="background:${colorMap[n.level]}"></span>
+        <div><div class="notif-text">${pick(n.text)}</div><div class="notif-time">${pick(n.time)}</div></div>
+      </button>
+    `);
+    item.onclick = ()=>{ togglePanel('notif'); navigate('actions'); };
+    wrap.appendChild(item);
+  });
+}
+
+/* ---------- Search ---------- */
+function buildSearchIndex(){
+  const idx = [];
+  COMMANDS.forEach(c=> idx.push({title:c.id+" — "+pick(c.subject), sub:(currentLang==='th'?'คำสั่งงาน · ':'Command · ')+pick(c.area), go:()=>navigate('commandDetail', c.id)}));
+  DOC_CATS.forEach(cat=> cat.docs.forEach(d=> idx.push({title:d.name, sub:(currentLang==='th'?'เอกสาร · ':'Document · ')+pick(cat.label), go:()=>navigate('documents')})));
+  TODAY.forEach(tk=> idx.push({title:pick(tk.task), sub:(currentLang==='th'?'งาน · ':'Task · ')+tk.contractor, go:()=>navigate('progress')}));
+  idx.push({title:"A-101", sub:(currentLang==='th'?'ห้อง · อาคาร A':'Room · Building A'), go:()=>navigate('commandDetail','COMMAND-024')});
+  return idx;
+}
+function onSearch(q){
+  const box = document.getElementById("searchResults");
+  if(!q || q.trim().length<1){ box.classList.remove("open"); box.innerHTML=""; return; }
+  const idx = buildSearchIndex();
+  const results = idx.filter(i => (i.title+" "+i.sub).toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  box.innerHTML = "";
+  if(results.length===0){
+    box.appendChild(el(`<div class="sr-item"><div class="sr-sub">${t('noResultsFor')} "${q}"</div></div>`));
+  } else {
+    results.forEach(r=>{
+      const item = el(`<div class="sr-item"><div class="sr-title">${r.title}</div><div class="sr-sub">${r.sub}</div></div>`);
+      item.onclick = ()=>{ r.go(); box.classList.remove("open"); document.getElementById("searchInput").value=""; };
+      box.appendChild(item);
+    });
+  }
+  box.classList.add("open");
+}
+
+/* ---------- Language switch ---------- */
+function setLang(lang){
+  currentLang = lang;
+  document.body.classList.toggle("lang-th", lang==="th");
+  document.getElementById("searchInput").placeholder = t("searchPlaceholder");
+  document.getElementById("brandSub").textContent = t("brandSub");
+  document.getElementById("sidebarFoot").innerHTML = t("sidebarFoot");
+  document.querySelectorAll(".lang-opt").forEach(b=> b.classList.toggle("sel", b.dataset.lang===lang));
+  renderNav();
+  renderRoleMenu();
+  updateRoleUI();
+  renderNotifs();
+  navigate(activeView, activeParam);
+}
+document.querySelectorAll(".lang-opt").forEach(b=>{
+  b.onclick = ()=> setLang(b.dataset.lang);
+});
+
+/* ============================= VIEW RENDERERS ============================= */
+
+const VIEWS = {};
+
+function getViewGroupColor(viewId){
+  let color = GROUP_COLORS.ng_overview;
+  for(const item of NAV){
+    if(item.group) color = GROUP_COLORS[item.group] || color;
+    else if(item.id===viewId) return color;
+  }
+  return color;
+}
+function pageHead(crumbKey, titleKey, subKey){
+  const color = getViewGroupColor(activeView);
+  return `<div class="page-head" style="border-left:4px solid ${color};padding-left:14px"><div class="crumb" style="color:${color};font-weight:700">${t(crumbKey)}</div><div class="page-title">${t(titleKey)}</div>${subKey?`<div class="page-sub">${t(subKey)}</div>`:""}</div>`;
+}
+function projectStrip(){
+  return `
+  <div class="project-strip">
+    <div>
+      <h1 class="th">${t('projectName')}</h1>
+      <div class="proj-meta">${t('projectMeta')}</div>
+    </div>
+    <div class="status-pill"><span class="dot"></span>${t('active')}</div>
+  </div>`;
+}
+
+/* ---------- Dashboard ---------- */
+VIEWS.dashboard = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = projectStrip() + pageHead("crumb_overview", "title_dashboard", "sub_dashboard");
+
+  wrap.appendChild(renderWaitingOnYou());
+
+  const zOverview = zoneStart('zone_overview', GROUP_COLORS.ng_overview);
+  const stats = [
+    {label:t("stat_overall"), value:"78%", delta:t("delta_vs_planned"), cls:"up", icon:"trend", color:"var(--blue)"},
+    {label:t("stat_planned"), value:"82%", delta:t("delta_baseline"), cls:"flat", icon:"calendar", color:"var(--ink-3)"},
+    {label:t("stat_verified"), value:"74%", delta:t("delta_verified"), cls:"up", icon:"check", color:"var(--green)"},
+    {label:t("stat_variance"), value:"+5 "+(currentLang==='th'?'วัน':'Days'), delta:t("delta_behind"), cls:"up", icon:"alert", color:"var(--amber)"},
+    {label:t("stat_delayed"), value:"8", delta:t("delta_across"), cls:"up", icon:"alert", color:"var(--red)"},
+    {label:t("stat_pending"), value:"12", delta:t("delta_awaiting"), cls:"flat", icon:"layers", color:"var(--blue)"},
+    {label:t("stat_active_cmd"), value:"25", delta:t("delta_thisweek"), cls:"good", icon:"command", color:"var(--brand)"},
+    {label:t("stat_critical"), value:"3", delta:t("delta_immediate"), cls:"up", icon:"spark", color:"var(--red)"},
+  ];
+  const grid = el(`<div class="grid grid-4" style="margin-bottom:14px"></div>`);
+  stats.forEach(s=>{
+    grid.appendChild(el(`
+      <div class="card stat-card">
+        <div class="stat-label">${s.label}
+          <span class="stat-icon" style="background:${s.color}1a;color:${s.color}">${icon(s.icon)}</span>
+        </div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-delta ${s.cls}">${s.delta}</div>
+      </div>
+    `));
+  });
+  zOverview.body.appendChild(grid);
+  wrap.appendChild(zOverview.el);
+
+  const zProgress = zoneStart('zone_progress', GROUP_COLORS.ng_progress);
+
+  // S-Curve + 3D preview, side by side
+  const visualCols = el(`<div class="grid grid-2" style="margin-bottom:14px"></div>`);
+  const scurveCard = el(`
+    <div class="card">
+      <div class="section-head" style="margin-bottom:2px"><div class="section-title">${t('scurve_title')}</div></div>
+      <div class="page-sub" style="margin:0 0 8px">${t('scurve_sub')}</div>
+      ${renderSCurveSVG()}
+      ${scurveLegend()}
+    </div>
+  `);
+  visualCols.appendChild(scurveCard);
+
+  const d3Card = el(`
+    <div class="card">
+      <div class="section-head" style="margin-bottom:2px"><div class="section-title">${t('nav_progress3d')}</div></div>
+      <div class="page-sub" style="margin:0 0 6px">${t('d3_preview_caption')}</div>
+      <div id="d3PreviewHost"></div>
+      <div style="text-align:center;margin-top:8px"><button class="btn btn-sm btn-ghost" id="d3OpenBtn">${t('d3_open_full')}</button></div>
+    </div>
+  `);
+  d3Card.querySelector("#d3PreviewHost").innerHTML = renderBuildingSVG(9, true); // preview: floor3 walls active
+  d3Card.querySelector("#d3OpenBtn").onclick = ()=>navigate('progress3d');
+  visualCols.appendChild(d3Card);
+  zProgress.body.appendChild(visualCols);
+
+  const todaySection = el(`
+    <div style="margin-bottom:4px">
+      <div class="section-head">
+        <div class="section-title">${t('todays_construction')}</div>
+        <button class="section-link" id="todayViewAll">${t('view_all_progress')}</button>
+      </div>
+      <div class="table-wrap" id="todayList"></div>
+    </div>
+  `);
+  todaySection.querySelector("#todayViewAll").onclick = ()=>navigate('progress');
+  const todayList = todaySection.querySelector("#todayList");
+  TODAY.forEach(tk=>{
+    todayList.appendChild(el(`
+      <div class="today-row">
+        <div>
+          <div class="today-task">${pick(tk.task)}</div>
+          <div class="today-meta">${tk.contractor} · ${currentLang==='th'?'อัปเดต':'Updated'} ${pick(tk.updated)}</div>
+        </div>
+        <div class="today-meta">${pick(tk.evidence)}</div>
+        <div class="mini-progress"><div class="bar-track"><div class="bar-fill" style="width:${tk.progress}%;background:${barColor(tk.progress)}"></div></div><span>${tk.progress}%</span></div>
+        <div>${statusBadge(tk.status, tk.statusColor)}</div>
+        <div style="text-align:right"><button class="btn btn-sm btn-ghost">${t('evidence_btn')}</button></div>
+      </div>
+    `));
+    todayList.lastChild.querySelector("button").onclick = ()=>navigate('evidence');
+  });
+  zProgress.body.appendChild(todaySection);
+  wrap.appendChild(zProgress.el);
+
+  const zCommands = zoneStart('zone_commands', GROUP_COLORS.ng_commands);
+  const recentCmd = el(`
+    <div>
+      <div class="section-head"><div class="section-title">${t('recent_commands')}</div><button class="section-link" id="cmdViewAll">${t('view_all')}</button></div>
+      <div id="recentCmdList"></div>
+    </div>
+  `);
+  recentCmd.querySelector("#cmdViewAll").onclick = ()=>navigate('commands');
+  const rcList = recentCmd.querySelector("#recentCmdList");
+  COMMANDS.slice(0,3).forEach(c=>{
+    const card = el(`
+      <div class="cmd-card">
+        <div>
+          <div class="cmd-id">${c.id}</div>
+          <div class="cmd-subject th">${pick(c.subject)}</div>
+        </div>
+        <div>${statusBadge(c.status, c.statusColor)}</div>
+      </div>
+    `);
+    card.onclick = ()=>navigate('commandDetail', c.id);
+    rcList.appendChild(card);
+  });
+  zCommands.body.appendChild(recentCmd);
+  wrap.appendChild(zCommands.el);
+
+  const zRisk = zoneStart('zone_risk', GROUP_COLORS.ng_evidence);
+  const riskCols = el(`<div class="grid grid-2" style="margin-bottom:14px"></div>`);
+  const actionPrev = el(`
+    <div>
+      <div class="section-head"><div class="section-title">${t('action_required')}</div><button class="section-link" id="actViewAll">${t('view_all')}</button></div>
+      <div id="actionPrevList"></div>
+    </div>
+  `);
+  actionPrev.querySelector("#actViewAll").onclick = ()=>navigate('actions');
+  const apList = actionPrev.querySelector("#actionPrevList");
+  ACTIONS.slice(0,3).forEach(a=>{
+    apList.appendChild(renderActionItem(a));
+  });
+  riskCols.appendChild(actionPrev);
+
+  const insightPrev = el(`
+    <div>
+      <div class="section-head"><div class="section-title">${t('nav_insight')}</div><button class="section-link" id="insViewAll">${t('view_all')}</button></div>
+      <div id="insPrevList"></div>
+    </div>
+  `);
+  insightPrev.querySelector("#insViewAll").onclick = ()=>navigate('insight');
+  const ipList = insightPrev.querySelector("#insPrevList");
+  const colorMapIns = {amber:"var(--amber)", red:"var(--red)", blue:"var(--blue)"};
+  INSIGHTS.slice(0,2).forEach(ins=>{
+    ipList.appendChild(el(`
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div class="insight-icon" style="width:26px;height:26px;background:${colorMapIns[ins.color]}1a;color:${colorMapIns[ins.color]}">${icon(ins.icon)}</div>
+          <div style="font-size:12.5px;font-weight:700;line-height:1.4">${pick(ins.title)}</div>
+        </div>
+      </div>
+    `));
+  });
+  riskCols.appendChild(insightPrev);
+  zRisk.body.appendChild(riskCols);
+
+  const conflictPrev = el(`
+    <div>
+      <div class="section-head"><div class="section-title">${t('nav_conflicts')}</div><button class="section-link" id="confViewAll">${t('view_all')}</button></div>
+      <div id="confPrevList"></div>
+    </div>
+  `);
+  conflictPrev.querySelector("#confViewAll").onclick = ()=>navigate('conflicts');
+  const cfList = conflictPrev.querySelector("#confPrevList");
+  CONFLICTS.forEach(cf=>{
+    cfList.appendChild(el(`
+      <div class="card">
+        <div style="font-size:12.8px;font-weight:700" class="th">${pick(cf.task)}</div>
+        <div class="conflict-vals" style="margin:10px 0 0">
+          <div class="conflict-cell"><div class="cl">${t('col_contractor_report')}</div><div class="cv">${cf.contractor}%</div></div>
+          <div class="conflict-cell truth"><div class="cl">${t('col_consultant_verified')}</div><div class="cv">${cf.consultant}%</div></div>
+        </div>
+      </div>
+    `));
+  });
+  zRisk.body.appendChild(conflictPrev);
+  wrap.appendChild(zRisk.el);
+
+  const zMilestones = zoneStart('zone_milestones', "var(--amber)");
+  const msStrip = el(`<div class="grid grid-3"></div>`);
+  [
+    {label:{en:"Building A Handover", th:"ส่งมอบอาคาร A"}, date:{en:"10 Oct 2026", th:"10 ต.ค. 2569"}, statusKey:"status_atrisk", color:"amber"},
+    {label:{en:"Building B Handover", th:"ส่งมอบอาคาร B"}, date:{en:"3 Oct 2026", th:"3 ต.ค. 2569"}, statusKey:"status_ontrack", color:"green"},
+    {label:{en:"Final Project Completion", th:"งานเสร็จสมบูรณ์ทั้งโครงการ"}, date:{en:"20 Oct 2026", th:"20 ต.ค. 2569"}, statusKey:"status_atrisk", color:"amber"},
+  ].forEach(m=> msStrip.appendChild(el(`<div class="card"><div class="stat-label">${pick(m.label)}</div><div style="font-size:15px;font-weight:700;margin-top:6px">${pick(m.date)}</div><div style="margin-top:8px">${statusBadge(m.statusKey,m.color)}</div></div>`)));
+  zMilestones.body.appendChild(msStrip);
+  wrap.appendChild(zMilestones.el);
+
+  return wrap;
+};
+
+/* ---------- Command Center ---------- */
+VIEWS.commands = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_commands", "title_commands", "sub_commands");
+  const list = el(`<div></div>`);
+  COMMANDS.forEach(c=>{
+    const card = el(`
+      <div class="cmd-card">
+        <div>
+          <div class="cmd-id">${c.id}</div>
+          <div class="cmd-subject th">${pick(c.subject)}</div>
+          <div class="cmd-meta">
+            <div>${t('issued_by')} <b>${t(c.issuer)}</b></div>
+            <div>${t('date_lbl')} <b>${pick(c.date)}</b></div>
+            <div>${t('deadline_lbl')} <b>${pick(c.deadline)}</b></div>
+            <div>${t('priority_lbl')} <b>${pick(c.priority)}</b></div>
+          </div>
+        </div>
+        <div>${statusBadge(c.status, c.statusColor)}</div>
+      </div>
+    `);
+    card.onclick = ()=>navigate('commandDetail', c.id);
+    list.appendChild(card);
+  });
+  wrap.appendChild(list);
+  return wrap;
+};
+
+VIEWS.commandDetail = function(id){
+  const c = COMMANDS.find(x=>x.id===id) || COMMANDS[0];
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(el(`
+    <button class="back-link">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ${t('back_to_commands')}
+    </button>
+  `));
+  wrap.lastChild.onclick = ()=>navigate('commands');
+
+  wrap.appendChild(el(`
+    <div class="page-head">
+      <div class="crumb">${c.id}</div>
+      <div class="page-title th">${pick(c.subject)}</div>
+      <div class="page-sub">${pick(c.description)}</div>
+    </div>
+  `));
+
+  const grid = el(`<div class="detail-grid"></div>`);
+
+  const left = el(`<div></div>`);
+  left.appendChild(el(`
+    <div class="section">
+      <div class="section-title" style="margin-bottom:10px">${t('related_tasks')}</div>
+      <div class="table-wrap" id="taskList"></div>
+    </div>
+  `));
+  const taskList = left.querySelector("#taskList");
+  c.tasks.forEach((tk,i)=>{
+    taskList.appendChild(el(`
+      <div class="task-row">
+        <div class="task-num">${String(i+1).padStart(2,'0')}</div>
+        <div class="task-name">${pick(tk.name)}</div>
+        <div class="mini-progress"><div class="bar-track"><div class="bar-fill" style="width:${tk.progress}%;background:${barColor(tk.progress)}"></div></div><span>${tk.progress}%</span></div>
+        <div>${tk.progress===100?statusBadge('status_done','green'):tk.progress===0?statusBadge('status_notstarted','gray'):statusBadge('status_inprogress','blue')}</div>
+      </div>
+    `));
+  });
+
+  const impactCard = el(`
+    <div class="section">
+      <div class="section-title" style="margin-bottom:10px">${t('cmd_impact_map')}</div>
+      <div class="card" style="cursor:pointer" id="impactPreview">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:12.8px;font-weight:700">${t('impact_preview_title')}</div>
+          </div>
+          <button class="btn btn-primary btn-sm">${t('open_map')}</button>
+        </div>
+      </div>
+    </div>
+  `);
+  left.appendChild(impactCard);
+  impactCard.querySelector("#impactPreview").onclick = ()=>navigate('impact', c.id);
+
+  grid.appendChild(left);
+
+  const right = el(`<div></div>`);
+  right.appendChild(el(`
+    <div class="card">
+      <div class="section-title" style="margin-bottom:8px">${t('cmd_information')}</div>
+      <div class="info-row"><span class="k">${t('cmd_id_lbl')}</span><span class="v">${c.id}</span></div>
+      <div class="info-row"><span class="k">${t('issuer_lbl')}</span><span class="v">${t(c.issuer)}</span></div>
+      <div class="info-row"><span class="k">${t('date_lbl')}</span><span class="v">${pick(c.date)}</span></div>
+      <div class="info-row"><span class="k">${t('ref_doc_lbl')}</span><span class="v">${c.refDoc}</span></div>
+      <div class="info-row"><span class="k">${t('area_lbl')}</span><span class="v">${pick(c.area)}</span></div>
+      <div class="info-row"><span class="k">${t('priority_lbl')}</span><span class="v">${pick(c.priority)}</span></div>
+      <div class="info-row"><span class="k">${t('deadline_lbl')}</span><span class="v">${pick(c.deadline)}</span></div>
+      <div class="info-row"><span class="k">${t('status_lbl')}</span><span class="v">${statusBadge(c.status,c.statusColor)}</span></div>
+    </div>
+  `));
+  if(currentRole==='owner' || currentRole==='consultant'){
+    right.appendChild(el(`<div style="height:12px"></div>`));
+    right.appendChild(el(`<button class="btn btn-primary" style="width:100%;justify-content:center">${t('edit_command')}</button>`));
+  }
+  right.appendChild(el(`<div style="height:8px"></div>`));
+  const exportBtn = el(`<button class="btn btn-ghost" style="width:100%;justify-content:center">${icon('print')}${t('export_report')}</button>`);
+  exportBtn.onclick = ()=>window.print();
+  right.appendChild(exportBtn);
+  grid.appendChild(right);
+
+  wrap.appendChild(grid);
+  return wrap;
+};
+
+/* ---------- Impact Map ---------- */
+VIEWS.impact = function(param){
+  const c = COMMANDS.find(x=>x.id===param) || COMMANDS[0];
+  const wrap = el(`<div></div>`);
+  wrap.appendChild(el(`
+    <button class="back-link">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ${t('back_to')} ${c.id}
+    </button>
+  `));
+  wrap.lastChild.onclick = ()=>navigate('commandDetail', c.id);
+  wrap.innerHTML += `<div class="page-head"><div class="crumb">${t('cmd_impact_map')}</div><div class="page-title">${t('impact_title')}</div><div class="page-sub">${t('impact_sub_pre')} <span class="th">"${pick(c.subject)}"</span> ${t('impact_sub_post')}</div></div>`;
+
+  const iwrap = el(`<div class="impact-wrap"></div>`);
+  const flow = el(`<div class="flow-card"></div>`);
+
+  flow.appendChild(el(`
+    <div class="flow-node origin">
+      <div class="fn-num">C</div>
+      <div class="fn-name th">${c.id} — ${pick(c.subject)}</div>
+      <div class="fn-pct">${t('issued_word')} ${pick(c.date)}</div>
+    </div>
+  `));
+  c.tasks.forEach((tk,i)=>{
+    flow.appendChild(el(`<div class="flow-connector"></div>`));
+    const cls = tk.progress===100?'done':(tk.progress>0?'active':'');
+    flow.appendChild(el(`
+      <div class="flow-node ${cls}">
+        <div class="fn-num">${tk.progress===100?'✓':(i+1)}</div>
+        <div class="fn-name">${pick(tk.name)}</div>
+        <div class="fn-pct">${tk.progress}%</div>
+      </div>
+    `));
+  });
+  iwrap.appendChild(flow);
+
+  const side = el(`<div></div>`);
+  side.appendChild(el(`
+    <div class="card">
+      <div class="impact-stat">
+        <div class="il">${t('schedule_impact_lbl')}</div>
+        <div class="iv ${c.scheduleImpact.startsWith('+')?'red':''}">${currentLang==='th'?c.scheduleImpactTh:c.scheduleImpact}</div>
+      </div>
+      <div class="impact-stat">
+        <div class="il">${t('cost_impact_lbl')}</div>
+        <div class="iv">${c.costImpact}</div>
+      </div>
+      <div class="impact-stat">
+        <div class="il">${t('affected_area_lbl')}</div>
+        <div class="iv" style="font-size:14.5px">${pick(c.area)}</div>
+      </div>
+      <div class="impact-stat">
+        <div class="il">${t('affected_activities_lbl')}</div>
+        <div class="tags">${c.affectedActivities.map(a=>`<span class="tag">${pick(a)}</span>`).join("")}</div>
+      </div>
+    </div>
+  `));
+  iwrap.appendChild(side);
+
+  wrap.appendChild(iwrap);
+  return wrap;
+};
+
+/* ---------- Progress ---------- */
+VIEWS.progress = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_progress", "title_progress", "sub_progress");
+
+  const exportRow = el(`<div style="display:flex;justify-content:flex-end;margin:-8px 0 12px"><button class="btn btn-sm btn-ghost">${icon('print')}${t('export_report')}</button></div>`);
+  exportRow.querySelector("button").onclick = ()=>window.print();
+  wrap.appendChild(exportRow);
+
+  const scurveCard2 = el(`
+    <div class="card section">
+      <div class="section-head" style="margin-bottom:2px"><div class="section-title">${t('scurve_title')}</div></div>
+      <div class="page-sub" style="margin:0 0 8px">${t('scurve_sub')}</div>
+      ${renderSCurveSVG()}
+      ${scurveLegend()}
+    </div>
+  `);
+  wrap.appendChild(scurveCard2);
+
+  const compareCard = el(`
+    <div class="card section">
+      <div class="compare-bars">
+        <div class="cbar-row">
+          <div class="cbar-top"><span>${t('stat_planned')}</span><b>82%</b></div>
+          <div class="cbar-track"><div class="cbar-fill" style="width:82%;background:var(--ink-3)"></div></div>
+        </div>
+        <div class="cbar-row">
+          <div class="cbar-top"><span>${t('contractor_reported')}</span><b>86%</b></div>
+          <div class="cbar-track"><div class="cbar-fill" style="width:86%;background:var(--blue)"></div></div>
+        </div>
+        <div class="cbar-row">
+          <div class="cbar-top"><span>${t('stat_verified')}</span><b>74%</b></div>
+          <div class="cbar-track"><div class="cbar-fill" style="width:74%;background:var(--green)"></div></div>
+        </div>
+      </div>
+    </div>
+  `);
+  wrap.appendChild(compareCard);
+
+  const alert = el(`
+    <div class="alert alert-amber section">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <div>
+        <div class="alert-title">${t('discrepancy_title')}</div>
+        <div class="alert-body">${t('discrepancy_body')}</div>
+        <div class="alert-actions"><button class="btn btn-sm btn-primary" id="reviewEvBtn">${t('review_evidence')}</button></div>
+      </div>
+    </div>
+  `);
+  alert.querySelector("#reviewEvBtn").onclick = ()=>navigate('evidence');
+  wrap.appendChild(alert);
+
+  wrap.appendChild(el(`
+    <div class="section-head"><div class="section-title">${t('today_detail')}</div></div>
+  `));
+  const table = el(`
+    <div class="table-wrap section">
+      <table>
+        <thead><tr><th>${t('th_task')}</th><th>${t('th_contractor')}</th><th>${t('th_progress')}</th><th>${t('th_status')}</th><th>${t('th_evidence')}</th><th>${t('th_updated')}</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `);
+  const tbody = table.querySelector("tbody");
+  TODAY.forEach(tk=>{
+    tbody.appendChild(el(`
+      <tr>
+        <td class="strong">${pick(tk.task)}</td>
+        <td>${tk.contractor}</td>
+        <td style="width:140px"><div class="mini-progress"><div class="bar-track"><div class="bar-fill" style="width:${tk.progress}%;background:${barColor(tk.progress)}"></div></div><span>${tk.progress}%</span></div></td>
+        <td>${statusBadge(tk.status,tk.statusColor)}</td>
+        <td>${pick(tk.evidence)}</td>
+        <td>${pick(tk.updated)}</td>
+      </tr>
+    `));
+  });
+  wrap.appendChild(table);
+  return wrap;
+};
+
+/* ---------- 3D Progress Model ---------- */
+VIEWS.progress3d = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_progress3d", "title_progress3d", "sub_progress3d");
+
+  const container = el(`<div class="detail-grid"></div>`);
+
+  const left = el(`
+    <div class="card" style="padding:22px 10px">
+      <div id="d3Host"></div>
+      <div style="max-width:340px;margin:14px auto 0">
+        <input id="d3Slider" type="range" min="0" max="${D3_MAX_STAGE}" value="9" style="width:100%">
+        <div style="display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-top:4px">
+          <span>${t('d3_stage_site')}</span><span>${t('d3_stage_roof')}</span>
+        </div>
+      </div>
+    </div>
+  `);
+
+  const right = el(`
+    <div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="impact-stat" style="padding-top:0">
+          <div class="il">${t('d3_report_week')}</div>
+          <div class="iv" id="d3WeekVal" style="font-size:19px">${t('scurve_week')} 9</div>
+        </div>
+        <div class="impact-stat">
+          <div class="il">${t('d3_current_stage')}</div>
+          <div class="iv" id="d3StageVal" style="font-size:14.5px"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:8px">${t('d3_legend')}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--ink-2)"><span style="width:14px;height:14px;border-radius:3px;background:#9AA6AD;display:inline-block"></span>${t('d3_legend_done')}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:var(--ink-2)"><span style="width:14px;height:14px;border-radius:3px;background:#C1402F;display:inline-block"></span>${t('d3_legend_active')}</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)"><span style="width:14px;height:14px;border-radius:3px;border:1.5px dashed #CBD0D8;display:inline-block"></span>${t('d3_legend_pending')}</div>
+      </div>
+    </div>
+  `);
+
+  container.appendChild(left);
+  container.appendChild(right);
+  wrap.appendChild(container);
+
+  function update(N){
+    left.querySelector("#d3Host").innerHTML = renderBuildingSVG(N, false);
+    right.querySelector("#d3WeekVal").textContent = `${t('scurve_week')} ${N}`;
+    right.querySelector("#d3StageVal").textContent = d3CurrentLabel(N);
+  }
+  const slider = left.querySelector("#d3Slider");
+  slider.oninput = (e)=> update(parseInt(e.target.value,10));
+  update(9);
+
+  return wrap;
+};
+
+VIEWS.verification = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_verify", "title_verify", "sub_verify");
+
+  VERIFICATIONS.forEach((v)=>{
+    const card = el(`
+      <div class="verify-card">
+        <div class="verify-top">
+          <div>
+            <div class="verify-name">${pick(v.task)}</div>
+            <div class="verify-loc">${pick(v.location)} · ${v.evidence} ${currentLang==='th'?'รูปที่ส่งมา':'photos submitted'}</div>
+          </div>
+          ${v.flag?statusBadge('ai_flagged','red'):statusBadge('routine','gray')}
+        </div>
+        <div class="verify-cols">
+          <div class="verify-col"><div class="vl">${t('col_contractor_report')}</div><div class="vv">${v.reported}%</div></div>
+          <div class="verify-col"><div class="vl">${t('col_ai_estimate')}</div><div class="vv" style="color:${Math.abs(v.reported-v.ai)>15?'var(--red)':'var(--ink)'}">${v.ai}%</div></div>
+          <div class="verify-col"><div class="vl">${t('col_consultant_verify')}</div><div class="vv verify-final-val" style="color:var(--ink-3);font-size:13px;font-weight:700">${t('pending')}</div></div>
+        </div>
+        ${v.flag?`<div class="alert alert-red" style="margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div><div class="alert-title">${t('potential_discrepancy')}</div><div class="alert-body">${t('visual_evidence_inconsistent')}</div></div></div>`:""}
+        <div class="verify-actions">
+          ${currentRole==='consultant'?`<button class="btn btn-green verify-yes">${t('verify_pct')} ${v.reported===v.ai?v.reported:v.ai}%</button><button class="btn btn-red-outline verify-no">${t('reject_revision')}</button>`:`<button class="btn btn-ghost" disabled>${t('awaiting_review')}</button>`}
+          <button class="btn btn-ghost view-ev-btn" style="margin-left:auto">${t('view_evidence')}</button>
+        </div>
+      </div>
+    `);
+    card.querySelector(".view-ev-btn").onclick = ()=>navigate('evidence');
+    if(currentRole==='consultant'){
+      card.querySelector(".verify-yes").onclick = (e)=>{
+        const verifiedVal = v.reported===v.ai?v.reported:v.ai;
+        const finalCell = e.target.closest(".verify-card").querySelector(".verify-final-val");
+        finalCell.textContent = verifiedVal+"%";
+        finalCell.style.color = "var(--green)";
+        e.target.closest(".verify-actions").innerHTML = `<span class="badge badge-green"><span class="dot"></span>${t('verified_pct')} ${verifiedVal}%</span>`;
+      };
+      card.querySelector(".verify-no").onclick = (e)=>{
+        e.target.closest(".verify-actions").innerHTML = `<span class="badge badge-amber"><span class="dot"></span>${t('revision_required')}</span>`;
+      };
+    }
+    wrap.appendChild(card);
+  });
+  return wrap;
+};
+
+/* ---------- Evidence ---------- */
+VIEWS.evidence = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_evidence", "title_evidence", "sub_evidence");
+
+  const evItems = [
+    {id:"E-1024", task:{en:"Door Installation – A-101", th:"งานติดตั้งประตู – A-101"}, uploader:"role_contractor", date:{en:"22 Sep 2026", th:"22 ก.ย. 2569"}, flagged:true, reported:80, visual:55},
+    {id:"E-1023", task:{en:"Tiling – Lobby, Building B", th:"งานปูกระเบื้อง – ล็อบบี้ อาคาร B"}, uploader:"role_contractor", date:{en:"21 Sep 2026", th:"21 ก.ย. 2569"}, flagged:false, reported:70, visual:68},
+    {id:"E-1022", task:{en:"MDB Room Testing", th:"ทดสอบห้อง MDB"}, uploader:"role_consultant", date:{en:"20 Sep 2026", th:"20 ก.ย. 2569"}, flagged:false, reported:100, visual:97},
+    {id:"E-1021", task:{en:"Painting – Floor 3 Corridor", th:"งานทาสี – ทางเดินชั้น 3"}, uploader:"role_contractor", date:{en:"20 Sep 2026", th:"20 ก.ย. 2569"}, flagged:true, reported:60, visual:38},
+    {id:"E-1020", task:{en:"Opening Inspection – A-101", th:"ตรวจสอบช่องเปิด – A-101"}, uploader:"role_consultant", date:{en:"17 Sep 2026", th:"17 ก.ย. 2569"}, flagged:false, reported:100, visual:95},
+    {id:"E-1019", task:{en:"Material Delivery – Doors", th:"ขนส่งวัสดุ – ประตู"}, uploader:"role_contractor", date:{en:"16 Sep 2026", th:"16 ก.ย. 2569"}, flagged:false, reported:100, visual:92},
+  ];
+
+  const grid = el(`<div class="ev-grid"></div>`);
+  evItems.forEach(e=>{
+    const card = el(`
+      <div class="ev-card">
+        <div class="ev-thumb">
+          ${icon('photo')}
+          ${e.flagged?`<span class="ev-flag">${statusBadge('ai_flag','red')}</span>`:""}
+        </div>
+        <div class="ev-body">
+          <div class="ev-id">${t('photo_hash')}${e.id}</div>
+          <div class="ev-task">${pick(e.task)}</div>
+          <div class="ev-foot">${t('uploaded_by')} ${t(e.uploader)} · ${pick(e.date)}</div>
+        </div>
+      </div>
+    `);
+    card.onclick = ()=>openEvidenceDetail(e);
+    grid.appendChild(card);
+  });
+  wrap.appendChild(grid);
+
+  const detailHost = el(`<div id="evDetailHost"></div>`);
+  wrap.appendChild(detailHost);
+
+  function openEvidenceDetail(e){
+    const diff = Math.abs(e.reported - e.visual);
+    detailHost.innerHTML = "";
+    detailHost.appendChild(el(`
+      <div class="card section" style="margin-top:20px">
+        <div class="section-title" style="margin-bottom:4px">${t('photo_hash')}${e.id}</div>
+        <div class="page-sub" style="margin:0 0 6px">${pick(e.task)} · ${t('uploaded_by')} ${t(e.uploader)} ${currentLang==='th'?'เมื่อ':'on'} ${pick(e.date)}</div>
+        <div class="ai-box">
+          <div class="ai-box-head">
+            <span class="ai-chip">${icon('spark')} ${t('ai_photo_analysis')}</span>
+          </div>
+          <div class="ai-row">
+            <div class="ai-metric"><div class="al">${t('reported_progress_lbl')}</div><div class="av">${e.reported}%</div></div>
+            <div class="ai-metric"><div class="al">${t('visual_progress_lbl')}</div><div class="av">${e.visual}%</div></div>
+            <div class="ai-metric"><div class="al">${t('difference_lbl')}</div><div class="av" style="color:${diff>15?'var(--red)':'var(--ink)'}">${diff}%</div></div>
+          </div>
+          ${diff>15?`<div class="alert alert-red"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div><div class="alert-title">${t('potential_inconsistency')}</div><div class="alert-body">${t('visual_inconsistent_body')}</div></div></div>`
+          :`<div class="alert alert-blue"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3l10 18H2L12 3z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v4M12 17h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><div><div class="alert-title">${t('consistent_with_report')}</div><div class="alert-body">${t('consistent_body')}</div></div></div>`}
+          <div style="margin-top:12px"><button class="btn btn-primary btn-sm" id="goVerifyBtn">${t('review_evidence')}</button></div>
+        </div>
+      </div>
+    `));
+    detailHost.querySelector("#goVerifyBtn").onclick = ()=>navigate('verification');
+    detailHost.scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+
+  return wrap;
+};
+
+/* ---------- Action Required ---------- */
+function renderActionItem(a){
+  const meta = {crit:{cls:'crit', labelKey:'lvl_critical', bg:'var(--red)', ic:'alert', badgeColor:'red'}, att:{cls:'att', labelKey:'lvl_attention', bg:'var(--amber)', ic:'layers', badgeColor:'amber'}, fyi:{cls:'fyi', labelKey:'lvl_followup', bg:'var(--blue)', ic:'calendar', badgeColor:'blue'}}[a.level];
+  const item = el(`
+    <div class="action-item ${meta.cls}">
+      <div class="action-icon" style="background:${meta.bg}1a;color:${meta.bg}">${icon(meta.ic)}</div>
+      <div style="flex:1">
+        <div class="action-text">${pick(a.text)}</div>
+        <div class="action-meta">
+          <div>${t('responsible_lbl')} <b>${t(a.responsible)}</b></div>
+          <div>${t('deadline_lbl')} <b>${pick(a.deadline)}</b></div>
+          <div>${t('related_lbl')} <b>${typeof a.cmd==='object'?pick(a.cmd):a.cmd}</b></div>
+        </div>
+      </div>
+      <div class="action-right">${statusBadge(meta.labelKey, meta.badgeColor)}</div>
+    </div>
+  `);
+  return item;
+}
+VIEWS.actions = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_actions", "title_actions", "sub_actions");
+  ["crit","att","fyi"].forEach(level=>{
+    const items = ACTIONS.filter(a=>a.level===level);
+    if(items.length===0) return;
+    const labelKey = {crit:"lvl_critical", att:"lvl_attention", fyi:"lvl_followup"}[level];
+    wrap.appendChild(el(`<div class="section-head" style="margin-top:18px"><div class="section-title">${t(labelKey)}</div></div>`));
+    items.forEach(a=> wrap.appendChild(renderActionItem(a)));
+  });
+  return wrap;
+};
+
+/* ---------- Data Conflict ---------- */
+VIEWS.conflicts = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_conflicts", "title_conflicts", "sub_conflicts");
+
+  CONFLICTS.forEach(cf=>{
+    const card = el(`
+      <div class="conflict-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:14.5px;font-weight:700" class="th">${pick(cf.task)}</div>
+            <div style="font-size:11.8px;color:var(--ink-3);margin-top:2px">${cf.cmd}</div>
+          </div>
+          <button class="btn btn-sm btn-primary resolve-btn">${t('resolve')}</button>
+        </div>
+        <div class="conflict-vals">
+          <div class="conflict-cell"><div class="cl">${t('col_contractor_report')}</div><div class="cv">${cf.contractor}%</div></div>
+          <div class="conflict-cell truth"><div class="cl">${t('col_consultant_verified')}</div><div class="cv">${cf.consultant}%</div></div>
+          <div class="conflict-cell"><div class="cl">${t('col_daily_report')}</div><div class="cv">${cf.daily}%</div></div>
+          <div class="conflict-cell"><div class="cl">${t('col_ai_evidence')}</div><div class="cv">${cf.ai}%</div></div>
+        </div>
+        <div style="font-size:11.8px;color:var(--ink-3)">${t('conflict_footer')}</div>
+      </div>
+    `);
+    card.querySelector(".resolve-btn").onclick = ()=>navigate('verification');
+    wrap.appendChild(card);
+  });
+  return wrap;
+};
+
+/* ---------- Schedule Impact ---------- */
+VIEWS.schedule = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_schedule", "title_schedule", "sub_schedule");
+
+  const grid = el(`<div class="grid grid-3 section"></div>`);
+  [
+    {label:t("original_completion"), value:currentLang==='th'?"30 ก.ย. 2569":"30 Sep 2026", color:"var(--ink)"},
+    {label:t("current_forecast"), value:currentLang==='th'?"5 ต.ค. 2569":"5 Oct 2026", color:"var(--red)"},
+    {label:t("variance_lbl"), value:"+5 "+(currentLang==='th'?'วัน':'Days'), color:"var(--red)"},
+  ].forEach(s=>{
+    grid.appendChild(el(`<div class="card stat-card"><div class="stat-label">${s.label}</div><div class="stat-value" style="color:${s.color}">${s.value}</div></div>`));
+  });
+  wrap.appendChild(grid);
+
+  wrap.appendChild(el(`<div class="section-head"><div class="section-title">${t('delayed_activities')}</div></div>`));
+  const table = el(`
+    <div class="table-wrap section">
+      <table>
+        <thead><tr><th>${t('th_activity')}</th><th>${t('th_related_cmd')}</th><th>${t('th_baseline_date')}</th><th>${t('th_current_forecast')}</th><th>${t('th_variance')}</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  `);
+  const rows = [
+    {act:{en:"Door Installation, A-101", th:"งานติดตั้งประตู A-101"}, cmd:"COMMAND-024", base:{en:"26 Sep 2026", th:"26 ก.ย. 2569"}, fc:{en:"29 Sep 2026", th:"29 ก.ย. 2569"}, variance:{en:"+3 Days", th:"+3 วัน"}},
+    {act:{en:"Floor 3 Corridor Painting", th:"งานทาสีทางเดินชั้น 3"}, cmd:"COMMAND-021", base:{en:"20 Sep 2026", th:"20 ก.ย. 2569"}, fc:{en:"24 Sep 2026", th:"24 ก.ย. 2569"}, variance:{en:"+4 Days", th:"+4 วัน"}},
+    {act:{en:"Lobby Tiling Handover", th:"ส่งมอบงานปูกระเบื้องล็อบบี้"}, cmd:"COMMAND-023", base:{en:"27 Sep 2026", th:"27 ก.ย. 2569"}, fc:{en:"28 Sep 2026", th:"28 ก.ย. 2569"}, variance:{en:"+1 Day", th:"+1 วัน"}},
+  ];
+  const tbody = table.querySelector("tbody");
+  rows.forEach(r=>{
+    tbody.appendChild(el(`
+      <tr class="clickable">
+        <td class="strong">${pick(r.act)}</td>
+        <td>${r.cmd}</td>
+        <td>${pick(r.base)}</td>
+        <td>${pick(r.fc)}</td>
+        <td>${statusBadgeText(pick(r.variance),'red')}</td>
+      </tr>
+    `));
+    tbody.lastChild.onclick = ()=>navigate('commandDetail', r.cmd);
+  });
+  wrap.appendChild(table);
+
+  wrap.appendChild(el(`<div class="section-head" style="margin-top:22px"><div class="section-title">${t('critical_milestones')}</div></div>`));
+  const ms = el(`<div class="grid grid-3"></div>`);
+  [
+    {label:{en:"Building A Handover", th:"ส่งมอบอาคาร A"}, date:{en:"10 Oct 2026", th:"10 ต.ค. 2569"}, statusKey:"status_atrisk", color:"amber"},
+    {label:{en:"Building B Handover", th:"ส่งมอบอาคาร B"}, date:{en:"3 Oct 2026", th:"3 ต.ค. 2569"}, statusKey:"status_ontrack", color:"green"},
+    {label:{en:"Final Project Completion", th:"งานเสร็จสมบูรณ์ทั้งโครงการ"}, date:{en:"20 Oct 2026", th:"20 ต.ค. 2569"}, statusKey:"status_atrisk", color:"amber"},
+  ].forEach(m=> ms.appendChild(el(`<div class="card"><div class="stat-label">${pick(m.label)}</div><div style="font-size:15px;font-weight:700;margin-top:6px">${pick(m.date)}</div><div style="margin-top:8px">${statusBadge(m.statusKey,m.color)}</div></div>`)));
+  wrap.appendChild(ms);
+
+  return wrap;
+};
+
+/* ---------- AI Insight ---------- */
+VIEWS.insight = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_insight", "title_insight", "sub_insight");
+
+  const colorMap = {amber:"var(--amber)", red:"var(--red)", blue:"var(--blue)"};
+  INSIGHTS.forEach((ins,i)=>{
+    const card = el(`
+      <div class="insight-card">
+        <div class="insight-top">
+          <div class="insight-icon" style="background:${colorMap[ins.color]}1a;color:${colorMap[ins.color]}">${icon(ins.icon)}</div>
+          <div>
+            <div class="insight-type">${currentLang==='th'?'ข้อมูลเชิงลึกที่':'Insight'} 0${i+1} · ${pick(ins.type)}</div>
+            <div class="insight-title">${pick(ins.title)}</div>
+          </div>
+        </div>
+        <div class="insight-facts">
+          <div><div class="fl">${t('impact_word')}</div><div class="fv">${pick(ins.impact)}</div></div>
+          <div><div class="fl">${t('potential_schedule_impact')}</div><div class="fv">${pick(ins.scheduleImpact)}</div></div>
+        </div>
+        ${ins.action?`<button class="btn btn-sm btn-primary ins-action-btn">${t('review_evidence')}</button>`:""}
+      </div>
+    `);
+    if(ins.action) card.querySelector(".ins-action-btn").onclick = ()=>navigate('verification');
+    wrap.appendChild(card);
+  });
+
+  wrap.appendChild(el(`
+    <div class="alert alert-blue" style="margin-top:6px">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v6M12 7.5h.01" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+      <div>
+        <div class="alert-title">${t('ai_detects_title')}</div>
+        <div class="alert-body">${t('ai_detects_body')}</div>
+      </div>
+    </div>
+  `));
+  return wrap;
+};
+
+/* ---------- Documents ---------- */
+VIEWS.documents = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = pageHead("crumb_documents", "title_documents", "sub_documents");
+
+  DOC_CATS.forEach(cat=>{
+    const section = el(`
+      <div class="doc-cat">
+        <div class="doc-cat-title">${pick(cat.label)} <span class="n">(${cat.docs.length})</span></div>
+        <div class="doclist"></div>
+      </div>
+    `);
+    const list = section.querySelector(".doclist");
+    cat.docs.forEach(d=>{
+      const row = el(`
+        <div class="doc-row">
+          <div class="doc-icon">${icon('file')}</div>
+          <div style="flex:1">
+            <div class="doc-name">${d.name}</div>
+            <div class="doc-meta">${pick(d.meta)}</div>
+          </div>
+          ${d.cmd?`<span class="doc-link" role="button">${t('view_linked_command')}</span>`:`<span class="doc-link" style="color:var(--ink-3)">${t('open_word')}</span>`}
+        </div>
+      `);
+      if(d.cmd){
+        row.querySelector(".doc-link").onclick = ()=>{
+          const linkedCmd = COMMANDS.find(c=>c.refDoc===d.name);
+          if(linkedCmd) navigate('commandDetail', linkedCmd.id);
+        };
+      }
+      list.appendChild(row);
+    });
+    wrap.appendChild(section);
+  });
+  return wrap;
+};
+
+/* ---------- About ---------- */
+VIEWS.about = function(){
+  const wrap = el(`<div></div>`);
+  wrap.innerHTML = `
+    <div class="about-hero">
+      <div class="about-eyebrow">${t('eyebrow_project_info')}</div>
+      <div class="about-title th">ระบบศูนย์บัญชาการและบริหารคำสั่งงานก่อสร้างแบบบูรณาการ<br><span style="font-size:16px;font-weight:600;color:#B9CBCF">Construction Command Center (CCC)</span></div>
+      <div class="about-flow">${t('about_flow')}</div>
+    </div>
+  `;
+
+  wrap.appendChild(el(`
+    <div class="section">
+      <div class="section-title" style="margin-bottom:10px">${t('core_concept')}</div>
+      <div class="card th" style="font-size:13.3px;line-height:1.7;color:var(--ink-2)">
+        ${t('core_concept_quote')}
+        <br><br>
+        ${t('core_concept_body')}
+      </div>
+    </div>
+  `));
+
+  const cols = el(`<div class="about-cols section"></div>`);
+  const probKeys = ["problem_1","problem_2","problem_3","problem_4","problem_5","problem_6","problem_7"];
+  const problems = el(`
+    <div class="card">
+      <div class="section-title" style="margin-bottom:6px">${t('problems_title')}</div>
+      <div>${probKeys.map((k,i)=>`<div class="problem-item th"><b>${String(i+1).padStart(2,'0')}</b>${t(k)}</div>`).join("")}</div>
+    </div>
+  `);
+  const aiPrinciple = el(`
+    <div class="card th">
+      <div class="section-title" style="margin-bottom:6px">${t('ai_principle_title')}</div>
+      <div style="font-size:12.8px;color:var(--ink-2);line-height:1.7">${t('ai_principle_body')}</div>
+    </div>
+  `);
+  cols.appendChild(problems); cols.appendChild(aiPrinciple);
+  wrap.appendChild(cols);
+
+  function permCard(titleKey, itemsKey){
+    const items = tl(itemsKey);
+    return `
+      <div class="perm-card th">
+        <h4>${t(titleKey)}</h4>
+        <ul>${items.map(i=>`<li>${i}</li>`).join("")}</ul>
+      </div>
+    `;
+  }
+  wrap.appendChild(el(`
+    <div class="section">
+      <div class="section-title" style="margin-bottom:10px">${t('user_roles_title')}</div>
+      <div class="role-perm-grid">
+        ${permCard('perm_owner_title','perm_owner_items')}
+        ${permCard('perm_designer_title','perm_designer_items')}
+        ${permCard('perm_consultant_title','perm_consultant_items')}
+        ${permCard('perm_contractor_title','perm_contractor_items')}
+      </div>
+    </div>
+  `));
+
+  function protoCard(titleKey, itemsKey, accent){
+    const items = tl(itemsKey);
+    return `
+      <div class="card th" style="border-top:3px solid ${accent}">
+        <div class="section-title" style="margin-bottom:8px">${t(titleKey)}</div>
+        <ul style="margin:0;padding-left:18px;font-size:12.3px;color:var(--ink-2);line-height:1.9">${items.map(i=>`<li>${i}</li>`).join("")}</ul>
+      </div>
+    `;
+  }
+  wrap.appendChild(el(`
+    <div class="section">
+      <div class="section-title" style="margin-bottom:10px">${t('proto_vs_prod_title')}</div>
+      <div class="about-cols">
+        ${protoCard('proto_shows_title','proto_shows_items','var(--green)')}
+        ${protoCard('proto_next_title','proto_next_items','var(--amber)')}
+      </div>
+    </div>
+  `));
+
+  wrap.appendChild(el(`
+    <div class="section">
+      <div class="section-title" style="margin-bottom:10px">${t('about_prototype_title')}</div>
+      <div class="credit-box">
+        <div class="credit-row"><span>${t('prepared_by')}</span><b class="th">นายวีระ วงษ์สันต์ (Veera Wongson)</b></div>
+        <div class="credit-row"><span>${t('student_id')}</span><b>166505232018</b></div>
+        <div class="credit-row"><span>${t('section_lbl')}</span><b>CE16631E</b></div>
+        <div class="credit-row"><span>${t('project_type')}</span><b>${t('project_type_val')}</b></div>
+      </div>
+    </div>
+  `));
+
+  return wrap;
+};
+
+/* ============================= INIT ============================= */
+function startApp(){
+  setLang(currentLang);
+  checkMobile();
+}
+function checkMobile(){ document.getElementById("hamburger").style.display = window.innerWidth<=880 ? "flex" : "none"; }
+window.addEventListener("resize", checkMobile);
+
+wireLoginScreen();
+</script>
+</body>
+</html>
